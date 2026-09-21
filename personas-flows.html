@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design-Workshop – Personas &amp; Bausteine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:26ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:64ch;}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:6px;}
+  .section-sub{color:var(--muted); font-size:0.98rem; margin:0 0 20px; max-width:66ch;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  .rule-note{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:18px 20px;
+    font-size:0.98rem;
+  }
+  .rule-note strong{display:block; margin-bottom:4px; font-family:'Space Grotesk',sans-serif;}
+
+  /* Ablauf-Tabelle */
+  .timeline{display:flex; flex-direction:column;}
+  .step{
+    display:grid;
+    grid-template-columns:80px 1fr;
+    gap:16px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+    font-size:0.95rem;
+  }
+  .step:first-child{border-top:none;}
+  .step .time{font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:var(--muted);}
+
+  /* Personas */
+  .personas{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:16px;
+    margin-top:20px;
+  }
+  @media (max-width: 760px){ .personas{grid-template-columns:1fr;} }
+  .persona-card{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px 22px;
+    background:#fff;
+    break-inside:avoid;
+  }
+  .persona-card.is-blank{
+    border-style:dashed;
+    background:transparent;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    min-height:200px;
+  }
+  .persona-name{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.15rem;
+    margin-bottom:2px;
+  }
+  .persona-tag{
+    display:inline-block;
+    font-size:0.72rem;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--accent);
+    margin-bottom:12px;
+  }
+  .persona-card dl{margin:0;}
+  .persona-card dt{
+    font-size:0.72rem;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .persona-card dt:first-of-type{margin-top:0;}
+  .persona-card dd{margin:2px 0 0; font-size:0.92rem;}
+
+  /* Bausteine */
+  .baustein-intro{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 20px;
+    font-size:0.95rem;
+    margin-bottom:20px;
+  }
+  .bausteine{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .baustein{
+    border:1.5px solid var(--ink);
+    border-radius:99px;
+    padding:9px 18px;
+    font-size:0.92rem;
+    font-weight:500;
+    background:#fff;
+  }
+  .baustein.is-blank{
+    border-style:dashed;
+    border-color:var(--muted);
+    color:var(--muted);
+  }
+
+  .task{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+    margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ol,.task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:6px;}
+
+  .takeaway{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:6px;
+    padding:20px 22px;
+  }
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  table.combo{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+    font-size:0.92rem;
+  }
+  table.combo th, table.combo td{
+    border:1px solid var(--line);
+    padding:9px 12px;
+    text-align:left;
+  }
+  table.combo th{background:var(--panel); font-family:'Space Grotesk',sans-serif; font-size:0.85rem;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+
+  @media print{
+    header.hero{padding-top:0;}
+    section{break-inside:avoid;}
+    .persona-card.is-blank{display:none;}
+    footer{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Design-Workshop · Daten-Flows entwerfen</div>
+    <h1>Personas &amp; Bausteine für euren Daten-Flow</h1>
+    <p class="lead">
+      <strong>„Wie verändert sich der Blick auf die Daten, Schritt für
+      Schritt“</strong>. 
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="rule-note">
+      <span aria-hidden="true">✏️</span>
+      <div>
+        <strong>Der Auftrag</strong>
+        Nehmt eine der Personas unten. Skizziert, wie sich für diese Person
+        der Blick auf denselben Datensatz Schritt für Schritt verändert —
+        andere Aggregation, andere Kennzahl, neuer Vergleich, mehr oder
+        weniger Unsicherheit sichtbar. 
+        Jede Gruppe zeichnet Flows für mindestens zwei unterschiedliche Personas, die sich in der Reihenfolge der Bausteine unterscheiden. Arbeitet am Anfang individuell.
+        Die Bausteine weiter unten sind eine
+        Materialkiste an <em>Daten-Operationen</em>, keine Seitenstruktur.
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section>
+  <div class="wrap">
+    <h2>Beispiele - Personas</h2>
+    <p class="section-sub">
+      <strong>Startpunkt, nicht Endpunkt — ergänzt Details, die für euren Entwurf
+      wichtig sind </strong>, oder erfindet eine eigene vierte Persona, wenn ihr eine
+      Lücke seht.
+    </p>
+
+    <div class="personas">
+
+      <div class="persona-card">
+        <div class="persona-tag">Persona 1</div>
+        <div class="persona-name">Allgemeinbevölkerung</div>
+        <dl>
+          <dt>Kommt her via</dt>
+          <dd>Google-Suche, Link aus einem Newsartikel</dd>
+          <dt>Daten-Frage</dt>
+          <dd>„Ist das viel oder wenig, verglichen mit sonst?“</dd>
+          <dt>Aggregationsstufe?</dt>
+          <dd>Region? Alter? Geschlecht?</dd>
+          <dt>Vergleich/Referenz</dt>
+          <dd>Grobe Einordnung („mehr/weniger als sonst“)?</dd>
+          <dt>Unsicherheit relevant?</dt>
+          <dd>Nein — würde nur verunsichern</dd>
+          <dt>Erfolg =</dt>
+          <dd>Eine einzige, verständliche Einordnung mitgenommen?</dd>
+          <dt>Steigt aus, wenn</dt>
+          <dd>zu viele Zahlen auf einmal, keine Einordnung erkennbar?</dd>
+        </dl>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">Persona 2</div>
+        <div class="persona-name">Medizin / Forschung</div>
+        <dl>
+          <dt>Kommt her via</dt>
+          <dd>Bookmark, Fachnewsletter, Empfehlung von Kolleg:in</dd>
+          <dt>Daten-Frage</dt>
+          <dd>„Wie entwickelt sich die Inzidenz in Gruppe X, Region Y, über Zeit?“</dd>
+          <dt>Aggregationsstufe?</dt>
+          <dd>Bis auf Altersgruppe × Geschlecht × Grossregion?</dd>
+          <dt>Vergleich/Referenz</dt>
+          <dd>5-Jahres-Korridor (min/median/max), Vorjahresvergleich</dd>
+          <dt>Unsicherheit relevant?</dt>
+          <dd>Ja, zwingend — Meldeverzug, Datenvollständigkeit, Populationsbasis</dd>
+          <dt>Erfolg =</dt>
+          <dd>Passende Filterung gefunden, Rohdaten/Query exportiert</dd>
+          <dt>Steigt aus, wenn</dt>
+          <dd>Aggregationsstufe zu grob, Unsicherheit nicht ausgewiesen</dd>
+        </dl>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-tag">Persona 3</div>
+        <div class="persona-name">Medienschaffende</div>
+        <dl>
+          <dt>Kommt her via</dt>
+          <dd>BAG-Medienmitteilung, eigene Recherche</dd>
+          <dt>Daten-Frage</dt>
+          <dd>„Was hat sich am stärksten verändert — gibt's eine Zahl für die Schlagzeile?“</dd>
+          <dt>Aggregationsstufe?</dt>
+          <dd>National, plus eine auffällige Region/Gruppe zur Zuspitzung</dd>
+          <dt>Vergleich/Referenz</dt>
+          <dd>Veränderung ggü. Vorjahr, grösste Differenz im Datensatz</dd>
+          <dt>Unsicherheit relevant?</dt>
+          <dd>Nur als ein Satz („Zahlen vorläufig“), nicht im Detail</dd>
+          <dt>Erfolg =</dt>
+          <dd>Eine zitierfähige Zahl + Grafik gefunden</dd>
+          <dt>Steigt aus, wenn</dt>
+          <dd>unklar ist, ob die Zahl vorläufig ist, oder nichts Auffälliges auffindbar</dd>
+        </dl>
+      </div>
+
+      <div class="persona-card is-blank">
+        + eigene Persona ergänzen
+      </div>
+
+    </div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <h2>Informationsschichten</h2>
+    <div class="baustein-intro">
+        Ein funktionaler Daten-User-Flow sollte drei parallele Informationsschichten pro Schritt (Screen/Aktion) dokumentieren.
+    </div>
+     <div class="bausteine">
+      <span class="baustein">Interaktionsebene (Frontend): Was tut der Nutzer? (z.B. „Filtert nach Jahr 2026“, „Wechselt von Bar- zu Liniendiagramm“)</span>
+      <span class="baustein">Daten-Ebene (Backend): Was passiert mit den Daten? (z.B. „Aggregiert nach Region“, „Berechnet Inzidenz“)</span>
+      <span class="baustein">Inhaltsebene (Content): Was wird angezeigt? (z.B. „Inzidenz in der Region X“, „Veränderung in %“)</span>
+     </div>
+         <img src="data-user-flow.png" alt="Skizze: drei parallele Informationsschichten pro Schritt (Screen/Aktion) im Daten-Flow" style="margin-top:20px; border:1px solid var(--line); border-radius:6px; max-width:100%;">
+
+    </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Bausteine</h2>
+    <div class="baustein-intro">
+      Operationen <strong>auf den Daten</strong>, keine App-Features. Nutzt,
+      was zu eurer Persona passt — lasst bewusst weg, was nicht passt —
+      erfindet, was fehlt. Reihenfolge/Kombination ist offen.
+    </div>
+    <div class="bausteine">
+      <span class="baustein">Aggregationsebene wechseln (national ↔ Region ↔ Alter/Geschlecht)</span>
+      <span class="baustein">Kennzahl wechseln (absolut ↔ Inzidenz ↔ Veränderung in %)</span>
+      <span class="baustein">Referenz/Baseline einblenden (Vorjahr, 5-Jahres-Korridor, andere Region)</span>
+      <span class="baustein">Unsicherheit/Datenqualität sichtbar machen (vorläufig, Meldeverzug)</span>
+      <span class="baustein">Gruppenvergleich (zwei Kategorien nebeneinander)</span>
+      <span class="baustein">Drill-down / Roll-up (Detail ↔ Übersicht derselben Frage)</span>
+      <span class="baustein">Alternative Repräsentation (Tabelle ↔ Chart ↔ einzelne Zahl)</span>
+      <span class="baustein">Rohdaten-Zugriff (Download, API)</span>
+      <span class="baustein">Diagramm / Visualisierung</span>
+      <span class="baustein">Erklärtext / Glossar</span>
+      <span class="baustein">Filter (Region, Alter, Zeitraum)</span>
+      <span class="baustein">Methodik-Hinweis (Meldeverzug, Datenvollständigkeit)</span>
+      <span class="baustein">Kontakt zur Fachstelle</span>
+      <span class="baustein">Abo / Alarm bei neuen Zahlen</span>
+      <span class="baustein">Vergleich mit Vorjahr</span>
+      <span class="baustein">Interaktive Elemente, Animationen</span>
+      <span class="baustein">Erklärtext / Glossar <em style="font-style:normal; color:var(--muted); font-size:0.85em;">(unterstützend)</em></span>
+      <span class="baustein">Kontakt zur Fachstelle <em style="font-style:normal; color:var(--muted); font-size:0.85em;">(unterstützend)</em></span>
+      <span class="baustein is-blank">+ eigener Baustein</span>
+      <span class="baustein is-blank">+ eigener Baustein</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Notation</h2>
+    
+
+    <div class="task">
+      Überlegt: welche Abstraktionsebene ist für eure Persona passend? Welche Details sind für die Entscheidung relevant, welche nicht? Welche UI-Elemente sind nur Mittel zum Zweck und müssen nicht gezeichnet werden?
+    </div>
+
+    <h3 style="font-size:1.05rem; margin:24px 0 8px;">Datentransformation, nicht Navigation</h3>
+    <p>
+      Denkt in Zuständen eures Datensatzes, nicht in Screens.
+      <em>„Die Person wechselt von CH-weit auf Grossregion“</em> oder
+      <em>„von absoluten Fällen zu Inzidenz“</em> sind Datentransformationen —
+      der „Screen-Wechsel“ dahinter ist fast nebensächlich. Ob das später
+      durch einen Klick auf einen Filter, durch Scrollen oder durch eine neue
+      Seite passiert, ist eine <strong>andere, spätere</strong> Frage, die
+      heute ausdrücklich offen bleibt. Ein Daten-Flow ist kein Stapel
+      Screens, sondern eine Abfolge von Fragen an die Daten und ihren
+      visuellen Antworten.
+    </p>
+
+    <h3 style="font-size:1.05rem; margin:20px 0 8px;">Was gezeichnet wird — und was nicht</h3>
+    <div class="compare-plain" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div style="border:1px solid var(--line); border-radius:8px; padding:16px 18px; background:#fff;">
+        <strong style="font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:6px;">Zeichnen</strong>
+        <ul style="margin:0; padding-left:18px; font-size:0.92rem;">
+          <li>Datentransformationen auf hoher Flughöhe (Aggregation wechseln, Kennzahl wechseln, Referenz einblenden)</li>
+          <li>Entscheidungen: verzweigt sich die Frage hier — in welche neue Aggregation/Kennzahl?</li>
+          <li>Stellen, wo Unsicherheit/Datenqualität eine Rolle spielt</li>
+          <li>Stellen, wo die Person aussteigt oder zur vorherigen Ansicht zurückkehrt</li>
+          <li>Stellen, wo ihr selbst noch unsicher seid</li>
+        </ul>
+      </div>
+      <div style="border:1px solid var(--line); border-radius:8px; padding:16px 18px; background:#fff;">
+        <strong style="font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:6px;">Nicht zeichnen</strong>
+        <ul style="margin:0; padding-left:18px; font-size:0.92rem;">
+          <li>Alle UI-Elemente (Buttons, Filter-Widgets im Detail)</li>
+          <li>Welcher Chart-Typ genau, Layout, Farben, Icons</li>
+          <li>Navigationsstruktur/Menüs</li>
+          <li>Wie viele Seiten es am Ende sind</li>
+        </ul>
+      </div>
+    </div>
+
+   
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Leitfragen für euren Flow</h2>
+    <div class="task">
+      <strong>Beantwortet für eure Persona</strong>
+      <ol>
+        <li>Welche erste Frage/Zahl bekommt eure Person als Erstes zu sehen?</li>
+        <li>Wie verändert sich der Blick auf die Daten Schritt für Schritt — nicht: wohin klickt sie?</li>
+        <li>Welche Daten-Operationen (Bausteine) nutzt ihr, welche lasst ihr bewusst weg?</li>
+        <li>Wo braucht eure Person eine Referenz, einen Vergleich oder einen Unsicherheits-Hinweis — und wie zeigt ihr das?</li>
+        <li>Wo würde die Person aussteigen oder zur vorherigen Ansicht zurückkehren?</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Am Ende des Tages liegen vor</strong>
+      <span>Ein Daten-Flow mit eurer eigenen Notation — Zustände, Transformationen, Entscheidungen. Kein Chart-Design, keine Farben, kein Layout-Feinschliff.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Weiterarbeit: Kombi-Gruppen</h2>
+    <p class="section-sub">Für die Weiterarbeit werden je zwei Gruppen mit unterschiedlicher Persona zusammengelegt.</p>
+    <table class="combo">
+      <tr><th>Kombi</th><th>Gruppe mit Persona</th><th>+ Gruppe mit Persona</th></tr>
+      <tr><td>AB</td><td>Allgemeinbevölkerung</td><td>Medizin / Forschung</td></tr>
+      <tr><td>BC</td><td>Medizin / Forschung</td><td>Medienschaffende</td></tr>
+      <tr><td>CA</td><td>Medienschaffende</td><td>Allgemeinbevölkerung</td></tr>
+    </table>
+  </div>
+</section>
+
+
+
+<section>
+  <div class="wrap">
+    <h2>Synthese: unterschiedliche Flows durch die Themen</h2>
+    <p class="section-sub">
+      Am Ende liegen mehrere unterschiedliche Daten-Flows vor. Wie führt man das zu einer Lösung zusammen?
+    </p>
+    <div class="task">
+      <strong>Vier mögliche Muster</strong>
+      <ul>
+        <li><strong>Themen-Gate:</strong> Auswahl des Themas zuerst, danach ein eigener, vollständiger Bereich pro Thema.</li>
+        <li><strong>Ein Flow, gestaffelte Tiefe:</strong> gleiche Struktur für alle Themen, nur die Inhalte wechseln.</li>
+        <li><strong>Gemeinsame Basis + Themen-Türen:</strong> geteilte Basis-Komponenten, pro Thema ein schlanker eigener Zugang.</li>
+        <li><strong>Implizite Anpassung:</strong> das Thema ergibt sich aus dem Kontext (z.B. verlinkter Artikel), keine explizite Wahl nötig.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Handout zum Design-Workshop — Personas &amp; Bausteine.
+  </div>
+</footer>
+
+</body>
+</html>
