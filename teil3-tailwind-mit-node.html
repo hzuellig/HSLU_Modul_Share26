@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teil 3 – Tailwind mit Node</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:26ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:62ch;}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:14px;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  /* Pipeline / architecture diagram */
+  .pipeline{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:stretch;
+    gap:0;
+    margin-top:20px;
+  }
+  .pipe-box{
+    flex:1 1 150px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 14px;
+  }
+  .pipe-box .k{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:6px;
+    display:block;
+  }
+  .pipe-box strong{display:block; font-family:'Space Grotesk',sans-serif; font-size:0.98rem; margin-bottom:4px;}
+  .pipe-box p{margin:0; font-size:0.85rem; color:var(--muted); max-width:none;}
+  .pipe-arrow{
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 32px;
+    color:var(--muted);
+    font-size:1.3rem;
+  }
+  @media (max-width: 700px){
+    .pipeline{flex-direction:column;}
+    .pipe-arrow{transform:rotate(90deg); flex:0 0 24px;}
+  }
+
+  .watcher-box{
+    display:flex;
+    gap:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-top:20px;
+  }
+  .watcher-box .q{font-family:'Space Grotesk',sans-serif; font-weight:700; margin-bottom:6px;}
+  .watcher-box p{margin:0; max-width:none;}
+
+  .steps-setup{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-top:20px;
+  }
+  .setup-item{
+    display:grid;
+    grid-template-columns:36px 1fr;
+    gap:16px;
+    padding:18px 0;
+    border-top:1px solid var(--line);
+  }
+  .setup-item:first-child{border-top:none; padding-top:6px;}
+  .setup-item .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.1rem;
+    color:var(--accent);
+  }
+  .setup-item h4{font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:8px;}
+  .setup-item p{margin:0 0 8px; color:var(--muted); font-size:0.95rem;}
+
+  .cmd{
+    background:var(--code-bg);
+    border-radius:4px;
+    padding:12px 14px;
+    font-size:0.85rem;
+    color:var(--code-ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    overflow-x:auto;
+  }
+  .cmd + .cmd{margin-top:6px;}
+  .cmd code{color:var(--code-ink); white-space:pre;}
+  .copy-btn{
+    background:transparent;
+    border:1px solid #555;
+    color:#ddd;
+    border-radius:4px;
+    padding:4px 10px;
+    font-size:0.75rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .copy-btn:hover{border-color:#888; color:#fff;}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  pre.file{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:14px 16px;
+    border-radius:8px;
+    font-size:0.8rem;
+    overflow-x:auto;
+    margin:8px 0 0;
+  }
+  .file-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-top:16px;
+    margin-bottom:2px;
+  }
+
+  table.tree{border-collapse:collapse; width:100%; margin-top:16px; font-size:0.9rem;}
+  table.tree td{padding:6px 10px; border-top:1px solid var(--line); vertical-align:top;}
+  table.tree td:first-child{font-family:'JetBrains Mono',monospace; white-space:nowrap; color:var(--ink);}
+  table.tree td:last-child{color:var(--muted);}
+
+  .task{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:4px;}
+
+  .takeaway{background:var(--ink); color:var(--paper); border-radius:6px; padding:20px 22px;}
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+  footer a{color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Teil 3 von 4 · 12 Minuten</div>
+    <h1>Tailwind mit Node — Architektur &amp; eigenes Setup</h1>
+    <p class="lead">
+      Der Play-CDN aus Teil 2 war nur zum Reinschnuppern gedacht. Jetzt bauen
+      wir ein echtes Tailwind-Projekt mit Node.js: eine feste
+      <code class="inline-code">dist/main.css</code>-Datei, die nur die
+      wirklich verwendeten Klassen enthält — und ein Watcher, der sie bei
+      jedem Speichern automatisch neu erzeugt.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>1. Warum reicht der Play-CDN nicht mehr?</h2>
+    <p>
+      Erinnerung aus Teil 2: der Play-CDN kompiliert bei <em>jedem</em>
+      Seitenaufruf im Browser neu und liefert nie exakt die Klassen, die man
+      später wirklich braucht. Für ein echtes Projekt will man stattdessen
+      eine fertige, kleine CSS-Datei, die einmal — oder automatisch bei jeder
+      Änderung — auf dem eigenen Rechner gebaut wird. Dafür braucht es
+      <strong>Node.js</strong>: eine JavaScript-Laufzeitumgebung ausserhalb
+      des Browsers, mit der sich genau dieser Bauprozess ausführen lässt.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>2. Die Architektur: vom HTML zur fertigen CSS-Datei</h2>
+    <p>
+      Drei Werkzeuge arbeiten dabei zusammen: <strong>npm</strong> installiert
+      und verwaltet sie, <strong>Tailwind</strong> generiert die Utility-Klassen,
+      <strong>PostCSS</strong> reicht das Ergebnis durch eine kleine Pipeline
+      weiter. Der Ablauf sieht so aus:
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-box">
+        <span class="k">Quelle</span>
+        <strong>index.html</strong>
+        <p>Enthält die Tailwind-Klassen im Markup, z.B. <code class="inline-code">md:grid-cols-3</code>.</p>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <span class="k">Scan</span>
+        <strong>Tailwind Engine</strong>
+        <p>Durchsucht die in <code class="inline-code">content</code> (tailwind.config.js) angegebenen Dateien nach benutzten Klassennamen.</p>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <span class="k">Build</span>
+        <strong>PostCSS-Pipeline</strong>
+        <p>Tailwind selbst ist ein PostCSS-Plugin. Zusätzlich: <code class="inline-code">autoprefixer</code>, ggf. <code class="inline-code">cssnano</code> zum Verkleinern.</p>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-box">
+        <span class="k">Ergebnis</span>
+        <strong>dist/main.css</strong>
+        <p>Enthält nur die Basis-Styles + genau die Klassen, die im HTML tatsächlich vorkommen.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;">
+      Diese fertige Datei wird ganz normal per <code class="inline-code">&lt;link rel="stylesheet"&gt;</code>
+      im HTML eingebunden — kein <code class="inline-code">&lt;script&gt;</code>-Tag zur Laufzeit mehr nötig.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>3. Der Watcher: automatisch neu bauen bei jeder Änderung</h2>
+    <div class="watcher-box">
+      <div>
+        <p class="q">Warum reicht "einmal bauen" nicht?</p>
+        <p>
+          Während der Entwicklung ändert man laufend Klassen im HTML. Ohne
+          Watcher müsste man nach jeder Änderung von Hand den Build-Befehl neu
+          ausführen. Ein <strong>Watcher</strong> beobachtet die Quelldateien
+          im Hintergrund und stösst den Build automatisch an, sobald sich
+          etwas ändert — man muss nur speichern und den Browser aktualisieren
+          (oder Live Server macht auch das automatisch).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>4. Ein eigenes Projekt aufsetzen — Schritt für Schritt</h2>
+
+    <div class="steps-setup">
+      <div class="setup-item">
+        <div class="num">01</div>
+        <div>
+          <h4>Projektordner + npm initialisieren</h4>
+          <p>Legt eine <code class="inline-code">package.json</code> an, die alle Abhängigkeiten und Skripte des Projekts verwaltet.</p>
+          <div class="cmd"><code>mkdir mein-projekt &amp;&amp; cd mein-projekt<br/>npm init -y</code>
+            <button class="copy-btn" data-copy="mkdir mein-projekt && cd mein-projekt && npm init -y">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-item">
+        <div class="num">02</div>
+        <div>
+          <h4>Tailwind &amp; PostCSS installieren</h4>
+          <p>Werden lokal im Projekt installiert (Ordner <code class="inline-code">node_modules/</code>), nicht global auf dem Rechner.</p>
+          <div class="cmd"><code>npm install -D tailwindcss postcss postcss-cli autoprefixer</code>
+            <button class="copy-btn" data-copy="npm install -D tailwindcss postcss postcss-cli autoprefixer">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-item">
+        <div class="num">03</div>
+        <div>
+          <h4>Config-Dateien erzeugen</h4>
+          <p>Erstellt <code class="inline-code">tailwind.config.js</code> mit Grundgerüst.</p>
+          <div class="cmd"><code>npx tailwindcss init</code>
+            <button class="copy-btn" data-copy="npx tailwindcss init">Kopieren</button>
+          </div>
+          <div class="file-label">tailwind.config.js — anpassen:</div>
+          <pre class="file"><code>module.exports = {
+  content: ['./index.html'],
+  theme: { extend: {} },
+  plugins: [],
+}</code></pre>
+          <div class="file-label">postcss.config.js — neu anlegen:</div>
+          <pre class="file"><code>module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="setup-item">
+        <div class="num">04</div>
+        <div>
+          <h4>Input-CSS-Datei anlegen</h4>
+          <p>Diese drei Zeilen ziehen die Tailwind-Layer (Grundreset, Komponenten, Utilities) in die eigene CSS-Datei.</p>
+          <div class="file-label">css/input.css:</div>
+          <pre class="file"><code>@tailwind base;
+@tailwind components;
+@tailwind utilities;</code></pre>
+        </div>
+      </div>
+
+      <div class="setup-item">
+        <div class="num">05</div>
+        <div>
+          <h4>Build- &amp; Watch-Skripte in package.json</h4>
+          <p>Zwei Varianten: einmal bauen, oder dauerhaft beobachten.</p>
+          <pre class="file"><code>"scripts": {
+  "build-css": "postcss css/input.css -o dist/main.css",
+  "watch-css": "postcss css/input.css -o dist/main.css --watch"
+}</code></pre>
+          <div class="cmd"><code>npm run watch-css</code>
+            <button class="copy-btn" data-copy="npm run watch-css">Kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="setup-item">
+        <div class="num">06</div>
+        <div>
+          <h4>CSS im HTML einbinden</h4>
+          <p>Ab jetzt einfach <code class="inline-code">index.html</code> speichern — der Watcher baut <code class="inline-code">dist/main.css</code> automatisch neu.</p>
+          <pre class="file"><code>&lt;link rel="stylesheet" href="dist/main.css"&gt;</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Führt die Schritte oben in einem leeren Ordner aus und startet <code class="inline-code">npm run watch-css</code>.</li>
+        <li>Öffnet <code class="inline-code">index.html</code> mit Live Server, fügt eine Klasse wie <code class="inline-code">bg-red-600</code> hinzu und speichert.</li>
+        <li>Schaut euch <code class="inline-code">dist/main.css</code> an — die neue Klasse taucht dort automatisch auf.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5. Typische Ordnerstruktur danach</h2>
+    <table class="tree">
+      <tr><td>package.json</td><td>Abhängigkeiten + Skripte (build-css, watch-css)</td></tr>
+      <tr><td>node_modules/</td><td>installierte Pakete (nie von Hand bearbeiten, nicht ins Git einchecken)</td></tr>
+      <tr><td>tailwind.config.js</td><td>welche Dateien gescannt werden, eigenes Theme</td></tr>
+      <tr><td>postcss.config.js</td><td>PostCSS-Plugin-Pipeline</td></tr>
+      <tr><td>css/input.css</td><td>Quelle: <code class="inline-code">@tailwind</code>-Direktiven + eigenes CSS</td></tr>
+      <tr><td>dist/main.css</td><td>generiert — dieses File bindet man im HTML ein</td></tr>
+      <tr><td>index.html</td><td>Markup mit Tailwind-Klassen</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Mitnahme aus Teil 3</strong>
+      <span>Du verstehst die Kette HTML → Tailwind-Scan → PostCSS → fertiges CSS, kennst den Zweck des Watchers und hast ein minimales Tailwind+Node-Setup selbst aufgesetzt.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between;">
+    <span>← <a href="teil2-tailwind-ohne-node.html">Teil 2: Tailwind ohne Node</a></span>
+    <span>Teil 3 / 4</span>
+    <span>Weiter mit → <a href="teil4-designsystem.html">Teil 4: Designsystem</a></span>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const old = btn.textContent;
+        btn.textContent = 'Kopiert ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

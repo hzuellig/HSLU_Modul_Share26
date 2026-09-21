@@ -1,0 +1,50 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 16px;
+  background: #faf9f6;
+}
+
+h2 {
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  /* mobil: 1 Spalte */
+  gap: 12px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e3e1db;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Ab 700px Breite: 3 Spalten nebeneinander */
+/*  @media (min-width: 700px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }*/
+
+/* ---------p5.js Sketch --------- */        
+canvas {
+  display: block;
+}
+
+#p5Sketch {
+  width: 100%;
+  max-width: 700px;
+  margin: 12px auto 0;
+}

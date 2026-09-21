@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teil 4 – Designsystem + Tailwind</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:26ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:62ch;}
+  .lead a{color:var(--accent);}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:14px;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  .cmd{
+    background:var(--code-bg);
+    border-radius:4px;
+    padding:12px 14px;
+    font-size:0.85rem;
+    color:var(--code-ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    overflow-x:auto;
+  }
+  .cmd + .cmd{margin-top:6px;}
+  .cmd code{color:var(--code-ink); white-space:pre;}
+  .copy-btn{
+    background:transparent;
+    border:1px solid #555;
+    color:#ddd;
+    border-radius:4px;
+    padding:4px 10px;
+    font-size:0.75rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .copy-btn:hover{border-color:#888; color:#fff;}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  table.tree{border-collapse:collapse; width:100%; margin-top:16px; font-size:0.9rem;}
+  table.tree td{padding:6px 10px; border-top:1px solid var(--line); vertical-align:top;}
+  table.tree td:first-child{font-family:'JetBrains Mono',monospace; white-space:nowrap; color:var(--ink);}
+  table.tree td:last-child{color:var(--muted);}
+
+  .split{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px;}
+  @media (max-width: 700px){ .split{grid-template-columns:1fr;} }
+  .split-col{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+  }
+  .split-col.tw{border-top:4px solid #38bdf8;}
+  .split-col.ds{border-top:4px solid var(--accent);}
+  .split-col h4{font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:10px;}
+  .split-col ul{margin:0; padding-left:18px;}
+  .split-col li{margin-bottom:8px; font-size:0.92rem; color:var(--muted);}
+  .split-col li code{color:var(--ink);}
+
+  table.legend{border-collapse:collapse; width:100%; margin-top:10px; font-size:0.88rem;}
+  table.legend th{text-align:left; padding:6px 10px; border-bottom:2px solid var(--line); font-family:'Space Grotesk',sans-serif; font-size:0.85rem;}
+  table.legend td{padding:8px 10px; border-top:1px solid var(--line); vertical-align:top; color:var(--muted);}
+  table.legend td:first-child{font-family:'JetBrains Mono',monospace; color:var(--ink); white-space:nowrap;}
+
+  .classlist{margin-top:16px; padding-left:20px;}
+  .classlist li{margin-bottom:6px;}
+
+  .task{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:4px;}
+
+  .takeaway{background:var(--ink); color:var(--paper); border-radius:6px; padding:20px 22px;}
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+  footer a{color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Teil 4 von 4 · 18 Minuten</div>
+    <h1>Designsystem + Tailwind</h1>
+    <p class="lead">
+      Teil 3 hat ein generisches Tailwind+Node-Setup gezeigt. Jetzt schauen
+      wir ein reales Beispiel an: <code class="inline-code">designsystem_mini/</code>
+      im Workshop-Repo — dasselbe Prinzip, aber mit dem
+      <a href="https://swiss.github.io/designsystem/?path=/docs/get-started--docs" target="_blank" rel="noopener">Design System for the Swiss Confederation</a>
+      als Quelle für CSS-Klassen und Design-Tokens.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>1. Lokal aufsetzen</h2>
+    <p>
+      Gleiche Befehle wie in Teil 3 — <code class="inline-code">npm install</code>
+      lädt dieselben Werkzeuge (Tailwind, PostCSS, autoprefixer, …), nur mit
+      einer umfangreicheren <code class="inline-code">tailwind.config.js</code>
+      und mehr CSS-Quelldateien im Ordner <code class="inline-code">css/</code>.
+    </p>
+    <div class="cmd"><code>cd designsystem_mini<br/>npm install</code>
+      <button class="copy-btn" data-copy="cd designsystem_mini && npm install">Kopieren</button>
+    </div>
+    <div class="cmd"><code>npm run build-css</code>
+      <button class="copy-btn" data-copy="npm run build-css">Kopieren</button>
+    </div>
+    <div class="cmd"><code>npm run watch-css</code>
+      <button class="copy-btn" data-copy="npm run watch-css">Kopieren</button>
+    </div>
+    <p style="margin-top:14px;">
+      <code class="inline-code">watch-css</code> baut <code class="inline-code">dist/main.css</code>
+      automatisch neu, sobald sich <code class="inline-code">css/*.postcss</code>,
+      <code class="inline-code">tailwind.config.js</code> oder
+      <code class="inline-code">index.html</code> ändert — genau der Watcher
+      aus Teil 3, nur schon fertig konfiguriert. Öffnet <code class="inline-code">index.html</code>
+      am besten mit der VS-Code-Erweiterung <strong>Live Server</strong>
+      (Rechtsklick → "Open with Live Server").
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>2. Ordnerstruktur</h2>
+    <table class="tree">
+      <tr><td>index.html</td><td>Hauptseite: section/container/grid-Beispiele</td></tr>
+      <tr><td>css/</td><td>Designsystem-Quellen (PostCSS), unverändert aus github.com/swiss/designsystem</td></tr>
+      <tr><td>tailwind.config.js</td><td>Tailwind-Theme des Designsystems (Farben, Screens, Radien, …)</td></tr>
+      <tr><td>postcss.config.js</td><td>Pipeline: postcss-import, tailwindcss, autoprefixer, cssnano</td></tr>
+      <tr><td>dist/main.css</td><td>generierte CSS-Datei (durch <code class="inline-code">npm run build-css</code>)</td></tr>
+      <tr><td>assets/logos/</td><td>Logo Schweizerische Eidgenossenschaft</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>3. Was kommt von Tailwind, was vom Designsystem?</h2>
+    <p>
+      Wichtige Unterscheidung: Tailwind liefert nur die
+      <strong>generischen Bausteine</strong> — Utility-Klassen, Build-Pipeline,
+      Config-Format. Alle <strong>Klassennamen und Design-Entscheidungen</strong>,
+      die im HTML zu sehen sind (<code class="inline-code">container</code>,
+      <code class="inline-code">card</code>, <code class="inline-code">top-bar</code>,
+      <code class="inline-code">grid--responsive-cols-2</code>, …), stammen aus
+      dem Swiss Confederation Designsystem.
+    </p>
+
+    <div class="split">
+      <div class="split-col tw">
+        <h4>Direkt von Tailwind (generisch)</h4>
+        <ul>
+          <li><code class="inline-code">tailwindcss</code>, <code class="inline-code">tailwindcss/nesting</code> als PostCSS-Plugins</li>
+          <li><code class="inline-code">postcss-import</code>, <code class="inline-code">autoprefixer</code>, <code class="inline-code">cssnano</code> — Standard-Werkzeuge jeder CSS-Build-Pipeline</li>
+          <li><code class="inline-code">@import 'tailwindcss/base'</code> etc. in <code class="inline-code">main.postcss</code></li>
+          <li>Config-Grundstruktur (<code class="inline-code">content</code>, <code class="inline-code">theme</code>, <code class="inline-code">corePlugins</code>)</li>
+          <li>jede Utility-Klasse wie <code class="inline-code">flex</code>, <code class="inline-code">p-4</code>, <code class="inline-code">md:inline</code></li>
+        </ul>
+      </div>
+      <div class="split-col ds">
+        <h4>Vom Designsystem (projektspezifisch)</h4>
+        <ul>
+          <li><code class="inline-code">css/skins/*.postcss</code> — Farbthemen als CSS-Variablen</li>
+          <li><code class="inline-code">css/foundations/*.postcss</code> — Icons, Typografie, Spacings, Colors</li>
+          <li><code class="inline-code">css/layouts/*.postcss</code> — <code class="inline-code">container</code>, <code class="inline-code">grid--responsive-cols-*</code>, <code class="inline-code">section</code></li>
+          <li><code class="inline-code">css/components/*.postcss</code> — <code class="inline-code">btn</code>, <code class="inline-code">card</code>, <code class="inline-code">accordion</code>, …</li>
+          <li>Werte in <code class="inline-code">theme</code> von <code class="inline-code">tailwind.config.js</code> (Farben als <code class="inline-code">var(--color-primary-500)</code>, Screens, Radien) — die eigentlichen Design-Tokens des Bundes</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="margin-top:16px;">
+      Kurz: <strong>Ordnerstruktur, Klassennamen und Design-Tokens</strong> →
+      Designsystem. <strong>Build-Mechanik und Utility-Prinzip</strong> → Tailwind.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>4. Die wichtigsten Layout-Klassen</h2>
+    <ul class="classlist">
+      <li><code class="inline-code">.section</code> / <code class="inline-code">.section--default</code> — steuert vertikale Abstände</li>
+      <li><code class="inline-code">.container</code> — steuert horizontale Abstände + maximale Breite</li>
+      <li><code class="inline-code">.container--grid</code> — macht aus <code class="inline-code">.container</code> ein 12-Spalten-Grid</li>
+      <li><code class="inline-code">.container__full</code>, <code class="inline-code">.container__center--xs/sm/md</code> — Platzierung im 12-Spalten-Grid</li>
+      <li><code class="inline-code">.grid--responsive-cols-2/3/4</code> — 1 Spalte mobil, mehr Spalten ab grösseren Breakpoints</li>
+      <li><code class="inline-code">.grid--responsive-cols-1/3-2/3</code> — feste Spaltenverhältnisse, z.B. für Sidebar-Layouts</li>
+      <li><code class="inline-code">.gap--responsive</code> — Abstand zwischen Grid-Elementen, wächst mit dem Breakpoint</li>
+    </ul>
+    <p style="margin-top:14px;">
+      Alle Komponenten-Klassen (<code class="inline-code">btn</code>,
+      <code class="inline-code">card</code>, <code class="inline-code">input</code>,
+      <code class="inline-code">navbar</code>, <code class="inline-code">accordion</code>,
+      <code class="inline-code">table</code>, <code class="inline-code">badge</code>, …)
+      stehen unverändert zur Verfügung — Details in der
+      <a href="https://swiss.github.io/designsystem/?path=/docs/get-started--docs" target="_blank" rel="noopener">offiziellen Doku</a>.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Öffnet <code class="inline-code">designsystem_mini/index.html</code> mit Live Server, bei laufendem <code class="inline-code">watch-css</code>.</li>
+        <li>Ändert eine Box von <code class="inline-code">grid--responsive-cols-2</code> auf <code class="inline-code">grid--responsive-cols-3</code> und beobachtet den Effekt beim Verkleinern des Fensters.</li>
+        <li>Sucht in <code class="inline-code">css/components/btn.postcss</code> nach der Definition von <code class="inline-code">.btn</code> und vergleicht sie mit einer reinen Tailwind-Utility-Klasse wie <code class="inline-code">p-4</code>.</li>
+        <li>Tauscht das Farbthema, indem ihr in <code class="inline-code">index.html</code> die Skin-Klasse wechselt (<code class="inline-code">default</code> / <code class="inline-code">intranet</code> / <code class="inline-code">freebrand</code>), und beobachtet, was sich ändert.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Mitnahme aus Teil 4</strong>
+      <span>Du kannst in einem realen Projekt unterscheiden, was von Tailwind stammt und was vom Designsystem, und weisst, mit welchen Klassen sich responsive Layouts darüber bauen lassen.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between;">
+    <span>← <a href="teil3-tailwind-mit-node.html">Teil 3: Tailwind mit Node</a></span>
+    <span>Teil 4 / 4</span>
+    <span><a href="teil0-intro.html">Zurück zur Übersicht</a></span>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const old = btn.textContent;
+        btn.textContent = 'Kopiert ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

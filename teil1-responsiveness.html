@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teil 1 – Responsiveness &amp; Media Queries</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  .kicker a{color:var(--accent);}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:22ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:62ch;}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:14px;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  /* Resizable device frame */
+  .device-shell{
+    display:flex;
+    justify-content:center;
+    margin:20px 0 10px;
+  }
+  .device{
+    position:relative;
+    width:700px;
+    max-width:100%;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    overflow:hidden;
+    resize:horizontal;
+    min-width:280px;
+    max-width:100%;
+  }
+  .device iframe{
+    display:block;
+    width:100%;
+    height:260px;
+    border:0;
+  }
+  .device-handle{
+    position:absolute;
+    top:0; right:0; bottom:0;
+    width:14px;
+    cursor:ew-resize;
+    background:linear-gradient(90deg, transparent, rgba(0,0,0,0.04));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .device-handle::after{
+    content:"";
+    width:3px; height:28px;
+    border-radius:2px;
+    background:var(--muted);
+    opacity:0.5;
+  }
+  .device-label{
+    text-align:center;
+    font-size:0.85rem;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .device-label .w{font-family:'JetBrains Mono',monospace; color:var(--ink); font-weight:500;}
+  .device-label .bp{
+    display:inline-block;
+    margin-left:8px;
+    padding:1px 8px;
+    border-radius:99px;
+    font-size:0.78rem;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .bp.is-narrow{background:#eee; color:var(--muted);}
+  .bp.is-wide{background:var(--accent); color:#fff;}
+
+  .hint{font-size:0.85rem; color:var(--muted); text-align:center; margin-top:4px;}
+
+  /* Code editor + preview pairing */
+  .lab{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-top:20px;
+  }
+  @media (max-width: 760px){
+    .lab{grid-template-columns:1fr;}
+  }
+  .lab-col h3{
+    font-size:0.85rem;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:500;
+    color:var(--muted);
+    margin-bottom:8px;
+    text-transform:none;
+  }
+  textarea.code-editor{
+    width:100%;
+    height:340px;
+    background:var(--code-bg);
+    color:var(--code-ink);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    line-height:1.6;
+    border:none;
+    border-radius:8px;
+    padding:16px;
+    resize:vertical;
+    tab-size:2;
+  }
+  .lab-preview{
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .lab-preview .device{
+    width:100%;
+    border:none;
+    border-radius:0;
+  }
+  .lab-preview iframe{height:308px;}
+
+  .copy-row{display:flex; justify-content:flex-end; margin-bottom:8px;}
+  .copy-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:4px;
+    padding:5px 12px;
+    font-size:0.8rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--ink); color:var(--ink);}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  .task{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+    margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:4px;}
+
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width: 700px){ .compare{grid-template-columns:1fr;} }
+  .compare pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:16px;
+    border-radius:8px;
+    font-size:0.8rem;
+    overflow-x:auto;
+    margin:0;
+  }
+  .compare h4{font-size:0.95rem; margin-bottom:8px;}
+
+  .takeaway{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:6px;
+    padding:20px 22px;
+  }
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem; display:flex; justify-content:space-between;}
+  footer a{color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Teil 1 von 4 · 12 Minuten</div>
+    <h1>Responsiveness &amp; Media Queries</h1>
+    <p class="lead">
+      Wie passt sich ein Layout an unterschiedliche Bildschirmgrössen an —
+      ganz ohne Framework? Zieh unten am rechten Rand, um die Breite live
+      zu verändern.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>1. Die Grundlage: viewport-Meta-Tag</h2>
+    <p>
+      Ohne diese Zeile im <code class="inline-code">&lt;head&gt;</code>
+      skaliert ein Handy-Browser die Seite einfach verkleinert, statt sie
+      wirklich neu anzuordnen. Sie gehört in <strong>jede</strong> Seite:
+    </p>
+    <div class="copy-row">
+      <button class="copy-btn" data-copy='<meta name="viewport" content="width=device-width, initial-scale=1.0">'>Code kopieren</button>
+    </div>
+    <pre style="background:var(--code-bg); color:var(--code-ink); padding:14px 16px; border-radius:8px; font-size:0.85rem; margin:0;"><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>2. Live-Beispiel: Grid, das umbricht</h2>
+    <p>
+      Drei Karten. Unter 700px stehen sie untereinander, ab 700px nebeneinander.
+      Der Rahmen unten ist ein eigener kleiner "Bildschirm" (ein
+      <code class="inline-code">&lt;iframe&gt;</code>) — zieh am rechten Rand,
+      um seine Breite zu verändern.
+    </p>
+
+    <div class="device-shell">
+      <div class="device" id="device1">
+        <iframe id="frame1" title="Live-Vorschau Grid"></iframe>
+        <div class="device-handle" id="handle1"></div>
+      </div>
+    </div>
+    <p class="device-label">Breite: <span class="w" id="width1">700px</span> <span class="bp" id="bp1">≥ 700px → 3 Spalten</span></p>
+    <p class="hint">← rechten Rand des Rahmens ziehen →</p>
+
+    <div class="lab">
+      <div class="lab-col">
+        <div class="copy-row" style="justify-content:space-between; align-items:center;">
+          <h3>Code (bearbeitbar)</h3>
+          <button class="copy-btn" id="copyBtn1">Ganzen Code kopieren</button>
+        </div>
+        <textarea class="code-editor" id="editor1" spellcheck="false"></textarea>
+      </div>
+      <div class="lab-col">
+        <h3>Ergebnis</h3>
+        <div class="lab-preview">
+          <div class="device" style="resize:none;">
+            <iframe id="frameLive1" title="Live-Editor-Vorschau"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      Verändere den Code links direkt — die Vorschau rechts aktualisiert sich sofort.
+      <ul>
+        <li>Ändere <code class="inline-code">700px</code> im <code class="inline-code">@media</code> auf <code class="inline-code">500px</code>.</li>
+        <li>Füge eine vierte <code class="inline-code">&lt;div class="card"&gt;</code> hinzu.</li>
+        <li>Ändere <code class="inline-code">grid-template-columns: repeat(3, 1fr)</code> auf <code class="inline-code">repeat(2, 1fr)</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>3. Mobile-First vs. Desktop-First</h2>
+    <p>
+      Es gibt zwei Denkrichtungen, je nachdem ob man mit <code class="inline-code">min-width</code>
+      oder <code class="inline-code">max-width</code> arbeitet. Meist empfohlen: mobile-first.
+    </p>
+    <div class="compare">
+      <div>
+        <h4>Mobile-first (empfohlen)</h4>
+        <pre><code>/* Basis-Stil = für schmale Screens */
+.card { padding: 12px; }
+
+/* ab hier: mehr Platz vorhanden */
+@media (min-width: 700px) {
+  .card { padding: 24px; }
+}</code></pre>
+      </div>
+      <div>
+        <h4>Desktop-first</h4>
+        <pre><code>/* Basis-Stil = für breite Screens */
+.card { padding: 24px; }
+
+/* ab hier: weniger Platz vorhanden */
+@media (max-width: 699px) {
+  .card { padding: 12px; }
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>4. Responsive p5.js-Sketches</h2>
+    <p>
+      Die gleiche Idee funktioniert auch für <code class="inline-code">&lt;canvas&gt;</code>-Grafiken:
+      Statt einer festen Grösse wie <code class="inline-code">createCanvas(400, 400)</code> misst man
+      die Breite des umgebenden Containers und rechnet die Höhe über ein festes Seitenverhältnis aus.
+      Bei einer Grössenänderung des Fensters wird der Canvas neu skaliert.
+    </p>
+
+    <h3 style="font-size:1rem; margin-bottom:8px;">HTML: Container statt fixer Canvas-Grösse</h3>
+    <pre><code>&lt;div id="p5Sketch"&gt;&lt;/div&gt;
+&lt;script src="sketch.js"&gt;&lt;/script&gt;</code></pre>
+
+    <h3 style="font-size:1rem; margin:16px 0 8px;">CSS: Container bestimmt die maximale Breite</h3>
+    <pre><code>#p5Sketch {
+  width: 100%;
+  max-width: 700px;
+  margin: 12px auto 0;
+}</code></pre>
+
+    <h3 style="font-size:1rem; margin:16px 0 8px;">JavaScript: Canvas an Container-Breite anpassen</h3>
+    <pre><code>let container;
+let ratio = 0.75; // Seitenverhältnis, z.B. 4:3
+
+function setup() {
+  container = document.getElementById('p5Sketch');
+  const canvas = createCanvas(container.clientWidth, container.clientWidth * ratio);
+  canvas.parent(container);
+}
+
+function draw() {
+  background(220);
+  // ... Zeichnen wie gewohnt, mit width/height statt fixen Zahlen
+}
+
+// wird von p5 automatisch bei jeder Fenstergrössenänderung aufgerufen
+function windowResized() {
+  const holder = document.getElementById('p5Sketch');
+  resizeCanvas(holder.clientWidth, holder.clientWidth * ratio);
+}</code></pre>
+
+    <p>
+      Wichtig dabei: <code class="inline-code">width</code> und <code class="inline-code">height</code>
+      in <code class="inline-code">draw()</code> nie fest verdrahten, sondern relativ verwenden
+      (z.B. <code class="inline-code">width / 2</code> für die Mitte), damit die Zeichnung bei jeder
+      Grösse passt.
+    </p>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Ändere <code class="inline-code">ratio</code> auf <code class="inline-code">0.5</code> und beobachte, wie sich die Höhe anpasst.</li>
+        <li>Ändere <code class="inline-code">max-width</code> im CSS und verkleinere das Browserfenster.</li>
+        <li>Ergänze in <code class="inline-code">draw()</code> eine zweite Form, die sich ebenfalls an <code class="inline-code">width</code>/<code class="inline-code">height</code> orientiert.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Mitnahme aus Teil 1</strong>
+      <span>Du weisst jetzt, was eine Media Query ist, wie <code style="color:#fff;">min-width</code> und <code style="color:#fff;">max-width</code> funktionieren, und kannst selbst ein responsives Grid bauen.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%;">
+    <span>Teil 1 / 4</span>
+    <span>Weiter mit → <a href="teil2-tailwind-ohne-node.html">Teil 2: Tailwind ohne Node</a></span>
+  </div>
+</footer>
+
+<script>
+  const demoSource = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background:#faf9f6; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr; /* mobil: 1 Spalte */
+    gap: 12px;
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e3e1db;
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  /* Ab 700px Breite: 3 Spalten nebeneinander */
+  @media (min-width: 700px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
+<\/head>
+<body>
+  <h2>Responsives Grid</h2>
+  <div class="grid">
+    <div class="card">Karte 1</div>
+    <div class="card">Karte 2</div>
+    <div class="card">Karte 3</div>
+  </div>
+<\/body>
+<\/html>`;
+
+  // statische Demo (nicht editierbar) oben
+  document.getElementById('frame1').srcdoc = demoSource;
+
+  // editierbare Demo
+  const editor1 = document.getElementById('editor1');
+  const frameLive1 = document.getElementById('frameLive1');
+  editor1.value = demoSource;
+  frameLive1.srcdoc = demoSource;
+
+  let debounce1;
+  editor1.addEventListener('input', () => {
+    clearTimeout(debounce1);
+    debounce1 = setTimeout(() => {
+      frameLive1.srcdoc = editor1.value;
+    }, 250);
+  });
+
+  // Resize-Handle für Device 1
+  function makeResizable(deviceEl, handleEl, labelId, bpId, threshold) {
+    let dragging = false;
+    handleEl.addEventListener('mousedown', (e) => {
+      dragging = true;
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const rect = deviceEl.parentElement.getBoundingClientRect();
+      let newWidth = e.clientX - rect.left;
+      newWidth = Math.max(280, Math.min(newWidth, rect.width));
+      deviceEl.style.width = newWidth + 'px';
+      document.getElementById(labelId).textContent = Math.round(newWidth) + 'px';
+      const bpEl = document.getElementById(bpId);
+      if (newWidth >= threshold) {
+        bpEl.textContent = `≥ ${threshold}px → 3 Spalten`;
+        bpEl.classList.add('is-wide');
+        bpEl.classList.remove('is-narrow');
+      } else {
+        bpEl.textContent = `< ${threshold}px → 1 Spalte`;
+        bpEl.classList.add('is-narrow');
+        bpEl.classList.remove('is-wide');
+      }
+    });
+    window.addEventListener('mouseup', () => dragging = false);
+  }
+  makeResizable(document.getElementById('device1'), document.getElementById('handle1'), 'width1', 'bp1', 700);
+
+  // Copy-Buttons
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => flashCopied(btn));
+    });
+  });
+  document.getElementById('copyBtn1').addEventListener('click', () => {
+    navigator.clipboard.writeText(editor1.value).then(() => flashCopied(document.getElementById('copyBtn1')));
+  });
+  function flashCopied(btn) {
+    const old = btn.textContent;
+    btn.textContent = 'Kopiert ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+  }
+</script>
+
+</body>
+</html>

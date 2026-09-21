@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Teil 2 – Tailwind ohne Node</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:24ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:62ch;}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:14px;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  .qa-box{
+    display:flex;
+    gap:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:20px 22px;
+  }
+  .qa-box .q{font-family:'Space Grotesk',sans-serif; font-weight:700; margin-bottom:6px;}
+  .qa-box p{margin:0; max-width:none;}
+
+  .limits{
+    margin-top:14px;
+    padding-left:20px;
+  }
+  .limits li{margin-bottom:4px; color:var(--muted);}
+
+  /* Resizable device frame */
+  .device-shell{display:flex; justify-content:center; margin:20px 0 10px;}
+  .device{
+    position:relative;
+    width:700px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    overflow:hidden;
+    resize:horizontal;
+    min-width:280px;
+    max-width:100%;
+  }
+  .device iframe{display:block; width:100%; height:260px; border:0;}
+  .device-handle{
+    position:absolute; top:0; right:0; bottom:0; width:14px;
+    cursor:ew-resize;
+    background:linear-gradient(90deg, transparent, rgba(0,0,0,0.04));
+    display:flex; align-items:center; justify-content:center;
+  }
+  .device-handle::after{content:""; width:3px; height:28px; border-radius:2px; background:var(--muted); opacity:0.5;}
+  .device-label{text-align:center; font-size:0.85rem; color:var(--muted); margin-top:10px;}
+  .device-label .w{font-family:'JetBrains Mono',monospace; color:var(--ink); font-weight:500;}
+  .device-label .bp{display:inline-block; margin-left:8px; padding:1px 8px; border-radius:99px; font-size:0.78rem; font-family:'JetBrains Mono',monospace;}
+  .bp.is-narrow{background:#eee; color:var(--muted);}
+  .bp.is-wide{background:var(--accent); color:#fff;}
+  .hint{font-size:0.85rem; color:var(--muted); text-align:center; margin-top:4px;}
+
+  .lab{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px;}
+  @media (max-width: 760px){ .lab{grid-template-columns:1fr;} }
+  .lab-col h3{font-size:0.85rem; font-family:'JetBrains Mono',monospace; font-weight:500; color:var(--muted); margin-bottom:8px;}
+  textarea.code-editor{
+    width:100%; height:360px;
+    background:var(--code-bg); color:var(--code-ink);
+    font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.6;
+    border:none; border-radius:8px; padding:16px; resize:vertical; tab-size:2;
+  }
+  .lab-preview{border:1px solid var(--line); border-radius:8px; overflow:hidden; background:#fff;}
+  .lab-preview .device{width:100%; border:none; border-radius:0;}
+  .lab-preview iframe{height:328px;}
+
+  .copy-row{display:flex; justify-content:flex-end; margin-bottom:8px;}
+  .copy-row.between{justify-content:space-between; align-items:center;}
+  .copy-btn{
+    background:transparent; border:1px solid var(--line); color:var(--muted);
+    border-radius:4px; padding:5px 12px; font-size:0.8rem; font-family:'Inter',sans-serif; cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--ink); color:var(--ink);}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  .task{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:4px;}
+
+  .compare{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width: 700px){ .compare{grid-template-columns:1fr;} }
+  .compare pre{background:var(--code-bg); color:var(--code-ink); padding:16px; border-radius:8px; font-size:0.78rem; overflow-x:auto; margin:0;}
+  .compare h4{font-size:0.95rem; margin-bottom:8px;}
+
+  .starter pre{background:var(--code-bg); color:var(--code-ink); padding:16px; border-radius:8px; font-size:0.82rem; overflow-x:auto; margin:0;}
+
+  .history{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-top:20px;
+  }
+  .history-item{
+    border-top:1px solid var(--line);
+    padding:20px 0;
+  }
+  .history-item:first-child{border-top:none; padding-top:8px;}
+  .history-year{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--accent);
+    margin-bottom:6px;
+  }
+  .history-item h4{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.05rem;
+    margin-bottom:8px;
+  }
+  .history-item p{margin:8px 0;}
+  .history-item pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:14px 16px;
+    border-radius:8px;
+    font-size:0.8rem;
+    overflow-x:auto;
+    margin:10px 0;
+  }
+
+  .takeaway{background:var(--ink); color:var(--paper); border-radius:6px; padding:20px 22px;}
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+  footer a{color:var(--accent); text-decoration:none;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Teil 2 von 4 · 10 Minuten</div>
+    <h1>CSS Frameworks - Tailwind ohne Node</h1>
+    <p class="lead">
+      Utility-First-CSS live im Browser ausprobieren — mit nur einer einzigen
+      Zeile HTML, ganz ohne Installation.
+    </p>
+  </div>
+</header>
+
+
+
+
+<section>
+  <div class="wrap">
+    <h2>1. Kurzer Rückblick: CSS-Frameworks </h2>
+    <p>
+      Tailwind ist nicht das erste Werkzeug, das versucht, wiederkehrende
+      Layout-Probleme zu lösen. Die immer gleichen Aufgaben — Spalten
+      anordnen, Abstände vereinheitlichen, auf Mobile reagieren — hat schon
+      vor Tailwind eine ganze Reihe von Frameworks angegangen, nur mit
+      unterschiedlichen Ansätzen:
+    </p>
+
+    <div class="history">
+      <div class="history-item">
+        <div class="history-year">seit ca. 2011</div>
+        <h4>960.gs, Bootstrap &amp; Grid-Systeme</h4>
+        <p>
+          Die Seite wird gedanklich in z.B. 12 gleich breite Spalten
+          eingeteilt. Man "belegt" damit Spalten statt sie selbst zu berechnen:
+        </p>
+        <pre><code>&lt;div class="row"&gt;
+  &lt;div class="col-md-4"&gt;...&lt;/div&gt;
+  &lt;div class="col-md-8"&gt;...&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p>
+  960 Grid System: 
+  <a href="https://960.gs/" target="_blank" rel="noopener">https://960.gs/</a>
+</p>
+
+        <p>
+          <code class="inline-code">col-md-4</code> = "4 von 12 Spalten,
+          ab der Grösse <em>md</em>". Bootstrap lieferte zusätzlich fertige
+          Komponenten (Buttons, Navbars, Modals) inkl. eigenem JavaScript —
+          ganze Seiten sahen dadurch oft sehr ähnlich aus ("bootstrap-y").
+        </p>
+      </div>
+
+      <div class="history-item">
+        <div class="history-year">seit ca. 2009</div>
+        <h4>Flexbox &amp; (später) CSS Grid</h4>
+        <p>
+          Der Browser selbst bekam eingebaute Layout-Systeme
+          (<code class="inline-code">display: flex</code>,
+          <code class="inline-code">display: grid</code>) — kein Framework
+          mehr nötig, um Spalten/Zeilen zu bauen. Das ist die Grundlage, auf
+          der auch Tailwind aufbaut (<code class="inline-code">flex</code>,
+          <code class="inline-code">grid-cols-3</code> sind letztlich dünne
+          Wrapper um genau diese Browser-Features).
+        </p>
+
+        <p>
+  Bootstrap: <a href="https://getbootstrap.com/" target="_blank" rel="noopener">https://getbootstrap.com/</a><br/>
+  Foundation: <a href="https://get.foundation/" target="_blank" rel="noopener">https://get.foundation/</a>
+</p>
+      </div>
+
+      <div class="history-item">
+        <div class="history-year">seit ca. 2017</div>
+        <h4>Utility-First (Tailwind &amp; Co.)</h4>
+        <p>
+          Statt fertiger Komponenten wie bei Bootstrap gibt's nur noch die
+          kleinsten Bausteine (<code class="inline-code">p-4</code>,
+          <code class="inline-code">flex</code>,
+          <code class="inline-code">text-white</code>) — man baut sein
+          eigenes Design daraus zusammen, statt Bootstraps Vorgaben zu
+          übernehmen. Dadurch sehen Tailwind-Seiten sich nicht zwangsläufig
+          ähnlich, anders als viele Bootstrap-Seiten früher.
+        </p>
+        <p>
+          Tailwind: <a href="https://tailwindcss.com/" target="_blank" rel="noopener">https://tailwindcss.com/</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="task" style="margin-top:20px;">
+      <strong>Das Muster dahinter</strong>
+      Jede Generation löst dasselbe Grundproblem — "wiederkehrende Aufgaben
+      nicht jedes Mal neu erfinden" — nur auf einer anderen Ebene: erst
+      fertige Grid-Klassen, dann eingebaute Browser-Layouts, dann
+      Utility-Klassen. Das <strong>Swiss Confederation Designsystem</strong>,
+      das wir gleich in Teil 4 anschauen, ist genau so eine Sammlung von
+      wiederkehrenden Patterns — nur eben spezifisch für Bundes-Webseiten.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>2. Tailwind Utility-First: viele kleine Klassen statt eigenem CSS</h2>
+    <p>
+      Statt <code class="inline-code">.card { padding: 16px; }</code> ins CSS
+      zu schreiben, kombiniert man direkt im HTML fertige Klassen:
+      <code class="inline-code">p-4</code> für Padding,
+      <code class="inline-code">flex</code> für Flexbox,
+      <code class="inline-code">bg-red-600</code> für eine Hintergrundfarbe.
+      Für Responsive gibt's Präfixe wie <code class="inline-code">md:</code> —
+      <strong>dieselbe Idee wie die Media Query aus Teil 1</strong>, nur als
+      fertige Klasse.
+    </p>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="qa-box">
+      <div>
+        
+        <p>
+          Der offizielle
+          <strong>Tailwind&nbsp;Play&nbsp;CDN</strong> kompiliert Utility-Klassen
+          live im Browser. Ein einziges <code class="inline-code">&lt;script&gt;</code>-Tag reicht:
+        </p>
+        <pre style="background:#0000000d; padding:10px 14px; border-radius:6px; margin-top:10px; font-size:0.85rem;"><code>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</code></pre>
+        <p style="margin-top:10px;">Aber: das ist bewusst nur zum Lernen/Prototypen gedacht.</p>
+        <ul class="limits">
+          <li>Kompiliert bei jedem Seitenaufruf neu (langsamer als eine fertige Datei)</li>
+          <li>Keine echte Projekt-Konfiguration (eigene Farben, Design-Tokens, …)</li>
+          <li>Tailwind selbst rät ausdrücklich von Produktiveinsatz ab</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>3. Live-Beispiel: dasselbe Grid, nur mit Tailwind</h2>
+    <p>
+      Genau dasselbe Ergebnis wie in Teil 1 — diesmal ganz ohne eigenes CSS,
+      nur mit Klassen. Auch hier: rechten Rand ziehen zum Testen.
+    </p>
+
+    <div class="device-shell">
+      <div class="device" id="device1">
+        <iframe id="frame1" title="Live-Vorschau Tailwind-Grid"></iframe>
+        <div class="device-handle" id="handle1"></div>
+      </div>
+    </div>
+    <p class="device-label">Breite: <span class="w" id="width1">700px</span> <span class="bp" id="bp1">≥ 768px (md) → 3 Spalten</span></p>
+    <p class="hint">← rechten Rand des Rahmens ziehen →</p>
+
+    <div class="lab">
+      <div class="lab-col">
+        <div class="copy-row between">
+          <h3>Code (bearbeitbar)</h3>
+          <button class="copy-btn" id="copyBtn1">Ganzen Code kopieren</button>
+        </div>
+        <textarea class="code-editor" id="editor1" spellcheck="false"></textarea>
+      </div>
+      <div class="lab-col">
+        <h3>Ergebnis</h3>
+        <div class="lab-preview">
+          <div class="device" style="resize:none;">
+            <iframe id="frameLive1" title="Live-Editor-Vorschau"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Ändere <code class="inline-code">md:grid-cols-3</code> auf <code class="inline-code">lg:grid-cols-3</code> — der Breakpoint verschiebt sich von 768px auf 1024px.</li>
+        <li>Ändere die Farbe <code class="inline-code">bg-red-600</code> auf <code class="inline-code">bg-blue-600</code> oder <code class="inline-code">bg-emerald-600</code>.</li>
+        <li>Füge eine vierte Karte hinzu und probiere <code class="inline-code">grid-cols-4</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>4. Vorher/Nachher: Teil 1 vs. Teil 2</h2>
+    <p>Gleiches Verhalten, unterschiedlicher Ansatz:</p>
+    <div class="compare">
+      <div>
+        <h4>Teil 1 — eigenes CSS</h4>
+        <pre><code>.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 700px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}</code></pre>
+      </div>
+      <div>
+        <h4>Teil 2 — Tailwind-Klassen</h4>
+        <pre><code>&lt;div class="grid grid-cols-1
+            md:grid-cols-3 gap-3"&gt;
+  ...
+&lt;/div&gt;
+
+&lt;!-- kein eigenes CSS nötig --&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap starter">
+    <h2>5. Startpunkt für eigene Experimente</h2>
+    <p>Dieses Grundgerüst kannst du 1:1 kopieren und lokal als <code class="inline-code">.html</code>-Datei speichern und im Browser öffnen — läuft sofort, ganz ohne Server:</p>
+    <div class="copy-row">
+      <button class="copy-btn" id="copyStarter">Code kopieren</button>
+    </div>
+    <pre id="starterCode"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="de"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+  &lt;title&gt;Tailwind Playground&lt;/title&gt;
+  &lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body class="bg-gray-50 p-6"&gt;
+
+  &lt;h1 class="text-2xl font-bold mb-4"&gt;Hallo Tailwind&lt;/h1&gt;
+
+  &lt;div class="grid grid-cols-1 md:grid-cols-3 gap-4"&gt;
+    &lt;div class="bg-white border rounded-lg p-4"&gt;Karte 1&lt;/div&gt;
+    &lt;div class="bg-white border rounded-lg p-4"&gt;Karte 2&lt;/div&gt;
+    &lt;div class="bg-white border rounded-lg p-4"&gt;Karte 3&lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Mitnahme aus Teil 2</strong>
+      <span>Du kannst direkt im Browser mit Tailwind-Klassen experimentieren, verstehst das Utility-Prinzip und kennst die Grenzen des Play-CDN.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between;">
+    <span>← <a href="teil1-responsiveness.html">Teil 1: Responsiveness</a></span>
+    <span>Teil 2 / 4</span>
+    <span>Weiter mit → <a href="teil3-tailwind-mit-node.html">Teil 3: Tailwind mit Node</a></span>
+  </div>
+</footer>
+
+<script>
+  const demoSource = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.tailwindcss.com"><\/script>
+<\/head>
+<body class="bg-[#faf9f6] p-4 font-sans">
+  <h2 class="text-sm font-semibold mb-3">Responsives Grid mit Tailwind</h2>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="bg-white border border-gray-200 rounded-md p-4 text-center text-sm">Karte 1</div>
+    <div class="bg-white border border-gray-200 rounded-md p-4 text-center text-sm">Karte 2</div>
+    <div class="bg-white border border-gray-200 rounded-md p-4 text-center text-sm">Karte 3</div>
+  </div>
+<\/body>
+<\/html>`;
+
+  document.getElementById('frame1').srcdoc = demoSource;
+
+  const editor1 = document.getElementById('editor1');
+  const frameLive1 = document.getElementById('frameLive1');
+  editor1.value = demoSource;
+  frameLive1.srcdoc = demoSource;
+
+  let debounce1;
+  editor1.addEventListener('input', () => {
+    clearTimeout(debounce1);
+    debounce1 = setTimeout(() => { frameLive1.srcdoc = editor1.value; }, 250);
+  });
+
+  function makeResizable(deviceEl, handleEl, labelId, bpId, threshold, wideLabel, narrowLabel) {
+    let dragging = false;
+    handleEl.addEventListener('mousedown', (e) => { dragging = true; e.preventDefault(); });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const rect = deviceEl.parentElement.getBoundingClientRect();
+      let newWidth = e.clientX - rect.left;
+      newWidth = Math.max(280, Math.min(newWidth, rect.width));
+      deviceEl.style.width = newWidth + 'px';
+      document.getElementById(labelId).textContent = Math.round(newWidth) + 'px';
+      const bpEl = document.getElementById(bpId);
+      if (newWidth >= threshold) {
+        bpEl.textContent = wideLabel;
+        bpEl.classList.add('is-wide'); bpEl.classList.remove('is-narrow');
+      } else {
+        bpEl.textContent = narrowLabel;
+        bpEl.classList.add('is-narrow'); bpEl.classList.remove('is-wide');
+      }
+    });
+    window.addEventListener('mouseup', () => dragging = false);
+  }
+  makeResizable(
+    document.getElementById('device1'), document.getElementById('handle1'),
+    'width1', 'bp1', 768,
+    '≥ 768px (md) → 3 Spalten', '< 768px → 1 Spalte'
+  );
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    if (btn.id === 'copyBtn1' || btn.id === 'copyStarter') return;
+  });
+  document.getElementById('copyBtn1').addEventListener('click', () => {
+    navigator.clipboard.writeText(editor1.value).then(() => flashCopied(document.getElementById('copyBtn1')));
+  });
+  document.getElementById('copyStarter').addEventListener('click', () => {
+    const code = document.getElementById('starterCode').innerText;
+    navigator.clipboard.writeText(code).then(() => flashCopied(document.getElementById('copyStarter')));
+  });
+  function flashCopied(btn) {
+    const old = btn.textContent;
+    btn.textContent = 'Kopiert ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+  }
+</script>
+
+</body>
+</html>

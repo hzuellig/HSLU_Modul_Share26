@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Workshop – Responsive Design &amp; Tailwind</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --accent-ink:#ffffff;
+    --panel:#f1efe9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  a{
+    color:var(--accent);
+    text-decoration:none;
+  }
+  code, .mono{
+    font-family:'JetBrains Mono',ui-monospace,monospace;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{
+    border-bottom:1px solid var(--line);
+    padding:64px 0 48px;
+  }
+  .kicker{
+    color:var(--accent);
+    font-weight:600;
+    font-size:0.95rem;
+    margin-bottom:14px;
+  }
+  h1{font-size:clamp(2rem, 4vw, 2.75rem); max-width:16ch;}
+  .lead{
+    margin-top:16px;
+    font-size:1.15rem;
+    color:var(--muted);
+    max-width:56ch;
+  }
+
+  section{padding:48px 0;border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+
+  .rule-note{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:18px 20px;
+    font-size:0.98rem;
+  }
+  .rule-note strong{display:block; margin-bottom:4px;}
+
+  .timeline{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+  .step{
+    display:grid;
+    grid-template-columns:64px 100px 1fr;
+    gap:20px;
+    padding:22px 0;
+    border-top:1px solid var(--line);
+    align-items:baseline;
+  }
+  .step:first-child{border-top:none;}
+  .step .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--accent);
+  }
+  .step .time{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.85rem;
+    color:var(--muted);
+  }
+  .step h3{font-size:1.15rem; margin-bottom:6px;}
+  .step p{margin:0; color:var(--muted); font-size:0.98rem;}
+  .step .tag{
+    display:inline-block;
+    margin-top:8px;
+    font-size:0.78rem;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--muted);
+  }
+
+  .prep-box{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:6px;
+    padding:28px 28px 24px;
+  }
+  .prep-box h3{color:var(--paper); font-size:1.2rem; margin-bottom:10px;}
+  .prep-box p{color:#c9c9cc; margin:0 0 16px;}
+  .cmd{
+    background:#000;
+    border-radius:4px;
+    padding:14px 16px;
+    font-size:0.9rem;
+    color:#e9e9e9;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .cmd + .cmd{margin-top:8px;}
+  .copy-btn{
+    background:transparent;
+    border:1px solid #555;
+    color:#ddd;
+    border-radius:4px;
+    padding:5px 10px;
+    font-size:0.78rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .copy-btn:hover{border-color:#888; color:#fff;}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Workshop · ca. 60 Minuten</div>
+    <h1>Responsive Design, Tailwind </h1>
+    
+    <p class="lead">
+      <a href="https://swiss.github.io/designsystem/?path=/docs/get-started--docs" target="_blank" rel="noopener">Design System for the Swiss Confederation</a>
+    </p>
+  </div>
+</header>
+
+
+
+<section>
+  <div class="wrap">
+    <h2 style="font-size:1.4rem; margin-bottom:8px;">22.09.2026, Modul Share </h2>
+    <div class="timeline">
+
+      <div class="step">
+        <div class="num">01</div>
+        <div class="time">20 min</div>
+        <div>
+          <h3><a href="teil1-responsiveness.html">Responsiveness &amp; Media Queries</a></h3>
+          <p>Warum passt sich ein Layout an? Grundsyntax von <code>@media</code>, ohne CSS Framework.</p>
+          <span class="tag">nur HTML/CSS</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">02</div>
+        <div class="time">10 min</div>
+        <div>
+          <h3><a href="teil2-tailwind-ohne-node.html">Tailwind ohne Node</a></h3>
+          <p>Utility-First-CSS live im Browser ausprobieren — über den Tailwind Play CDN, ohne Installation.</p>
+          <span class="tag">nur HTML, ein &lt;script&gt;-Tag</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">03</div>
+        <div class="time">12 min</div>
+        <div>
+          <h3>Tailwind mit Node</h3>
+          <p>Architektur (Node, Tailwind, PostCSS, Watcher) und ein eigenes, minimales Tailwind-Setup mit npm von Grund auf aufsetzen.</p>
+          <span class="tag">braucht Node.js</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">04</div>
+        <div class="time">18 min</div>
+        <div>
+          <h3>Designsystem + Tailwind</h3>
+          <p>Das vorbereitete Mini-Boilerplate mit dem Swiss Confederation Designsystem lokal aufsetzen, Elemente einsetzen und verändern.</p>
+          <span class="tag">braucht Node.js</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="prep-box">
+      <h3>Aufs nächste Mal installieren: Node.js</h3>
+      <p>
+        Teil 1 und 2 brauchen nichts weiter als einen Browser. Ab Teil 3
+        brauchst du <a href="https://nodejs.org/" style="color:#fff;" target="_blank" rel="noopener">Node.js</a>
+        (LTS-Version). Installiere es jetzt schon, dann läuft es nachher ohne Wartezeit.
+        Test im Terminal:
+      </p>
+      <div class="cmd">
+        <span class="mono">node -v</span>
+        <button class="copy-btn" data-copy="node -v">Kopieren</button>
+      </div>
+      <div class="cmd">
+        <span class="mono">npm -v</span>
+        <button class="copy-btn" data-copy="npm -v">Kopieren</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const old = btn.textContent;
+        btn.textContent = 'Kopiert ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = old; btn.classList.remove('copied'); }, 1500);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
