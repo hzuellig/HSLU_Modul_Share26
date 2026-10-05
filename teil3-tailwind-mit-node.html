@@ -196,7 +196,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="kicker">Teil 3 von 4 · 12 Minuten</div>
+    
     <h1>Tailwind mit Node — Architektur &amp; eigenes Setup</h1>
     <p class="lead">
       Der Play-CDN aus Teil 2 war nur zum Reinschnuppern gedacht. Jetzt bauen
@@ -230,7 +230,7 @@
       Drei Werkzeuge arbeiten dabei zusammen: <strong>npm</strong> installiert
       und verwaltet sie, <strong>Tailwind</strong> generiert die Utility-Klassen,
       <strong>PostCSS</strong> reicht das Ergebnis durch eine kleine Pipeline
-      weiter. Der Ablauf sieht so aus:
+      weiter (<a href="https://www.freecodecamp.org/news/what-is-postcss/">Was ist PostCSS</a>). Der Ablauf sieht so aus:
     </p>
 
     <div class="pipeline">
@@ -293,10 +293,10 @@
       <div class="setup-item">
         <div class="num">01</div>
         <div>
-          <h4>Projektordner + npm initialisieren</h4>
+          <h4>Projektordner TestTailwindp5 anlegen + npm initialisieren</h4>
           <p>Legt eine <code class="inline-code">package.json</code> an, die alle Abhängigkeiten und Skripte des Projekts verwaltet.</p>
-          <div class="cmd"><code>mkdir mein-projekt &amp;&amp; cd mein-projekt<br/>npm init -y</code>
-            <button class="copy-btn" data-copy="mkdir mein-projekt && cd mein-projekt && npm init -y">Kopieren</button>
+          <div class="cmd"><code>npm init -y</code>
+            <button class="copy-btn" data-copy="npm init -y">Kopieren</button>
           </div>
         </div>
       </div>
@@ -306,8 +306,9 @@
         <div>
           <h4>Tailwind &amp; PostCSS installieren</h4>
           <p>Werden lokal im Projekt installiert (Ordner <code class="inline-code">node_modules/</code>), nicht global auf dem Rechner.</p>
-          <div class="cmd"><code>npm install -D tailwindcss postcss postcss-cli autoprefixer</code>
-            <button class="copy-btn" data-copy="npm install -D tailwindcss postcss postcss-cli autoprefixer">Kopieren</button>
+          <p><strong>Wichtig:</strong> <code class="inline-code">npm install -D tailwindcss</code> installiert ohne Zusatz mittlerweile <strong>Version 4</strong>, die eine andere Architektur hat (keine <code class="inline-code">tailwind.config.js</code>, kein <code class="inline-code">postcss-cli</code> nötig, CSS-basierte Konfiguration). Diese Anleitung — und das Designsystem in Teil 4 — basiert noch auf <strong>Version 3.4.14</strong>. Deshalb die Version explizit anhängen:</p>
+          <div class="cmd"><code>npm install -D tailwindcss@3.4.14 postcss postcss-cli autoprefixer</code>
+            <button class="copy-btn" data-copy="npm install -D tailwindcss@3.4.14 postcss postcss-cli autoprefixer">Kopieren</button>
           </div>
         </div>
       </div>
@@ -399,11 +400,248 @@
   </div>
 </section>
 
+<section id="section-6">
+  <div class="wrap">
+    <h2>6. Kombination mit p5.js im Instance Mode</h2>
+    <div class="watcher-box">
+      <div>
+        <p class="q">Schreibweise wie sm:, hover: oder peer: noch unklar?</p>
+        <p>
+          Bevor es weitergeht, lohnt sich ein Abstecher zur
+          <a href="basic-tailwind.html">Tailwind-Basics-Seite</a> — dort
+          werden Breakpoint-Präfixe (<code class="inline-code">sm:</code>,
+          <code class="inline-code">lg:</code>), Zustands-Präfixe
+          (<code class="inline-code">hover:</code>) und
+          <code class="inline-code">peer</code>/<code class="inline-code">group</code>
+          separat und kompakt erklärt.
+        </p>
+      </div>
+    </div>
+    <p>
+      Das Setup ist nicht nur für Buttons und Boxen gedacht —
+      genau dieselbe <code class="inline-code">dist/main.css</code> lässt sich
+      auch neben einer p5-Sketch verwenden. Die Arbeitsteilung ist dabei klar:
+      <strong>p5 zeichnet nur in seine eigene <code class="inline-code">&lt;canvas&gt;</code></strong>,
+      alles drumherum — Seitenlayout, Buttons, Cockpit-Leiste — bleibt ganz
+      normales HTML und wird mit Tailwind-Klassen gestylt.
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-box">
+        <span class="k">p5-Sketch (JS) <a href="https://github.com/hslu-dda/hs26-share5/blob/main/p5_instanceMode.zip" target="_blank" rel="noopener noreferrer">Projekt laden</a></span>
+        <strong>sketch.js, Ball.js …</strong>
+        <p>Instance Mode: <code class="inline-code">function sketch(p) {...}</code>, zeichnet ausschliesslich in das ihm übergebene Canvas-Element.</p>
+      </div>
+      <div class="pipe-arrow">+</div>
+      <div class="pipe-box">
+        <span class="k">Tailwind (HTML)</span>
+        <strong>index.html</strong>
+        <p>Klassen für Grid, Abstände, Buttons, Toggle — steuert alles ausserhalb des Canvas.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;">
+      Die JS-Dateien der Sketches selbst enthalten keine Tailwind-Klassen —
+      Tailwind muss sie deshalb auch nicht scannen. In
+      <code class="inline-code">tailwind.config.js</code> genügt weiterhin
+      <code class="inline-code">content: ['./index.html']</code>.
+    </p>
+
+    <div class="file-label">Mehrere Sketches responsiv gruppieren:</div>
+    <pre class="file"><code>&lt;div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"&gt;
+  &lt;div id="canvas1" class="rounded-swiss border border-gray-200 bg-white p-4 shadow-sm"&gt;&lt;/div&gt;
+  &lt;div id="canvas2" class="rounded-swiss border border-gray-200 bg-white p-4 shadow-sm"&gt;&lt;/div&gt;
+  &lt;div id="canvas3" class="rounded-swiss border border-gray-200 bg-white p-4 shadow-sm"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    <p style="margin-top:14px;">
+      <code class="inline-code">grid-cols-1</code> ist die Grundeinstellung
+      für schmale Bildschirme (ein Sketch pro Zeile). Ab der
+      <code class="inline-code">sm</code>-Breakpoint (≥ 640px) springt das
+      Layout auf zwei Spalten, ab <code class="inline-code">lg</code>
+      (≥ 1024px) auf drei — ganz ohne eigene Media Queries.
+      <code class="inline-code">rounded-swiss</code> ist kein
+      Standard-Tailwind-Wert, sondern kommt aus einer eigenen
+      Theme-Erweiterung (siehe unten).
+    </p>
+
+    <div class="watcher-box">
+      <div>
+        <p class="q">Woher kommen swiss-red, swiss-dark und rounded-swiss?</p>
+        <p>
+          Diese Klassen sind kein Tailwind-Standard — sie stammen aus einer
+          eigenen <code class="inline-code">theme.extend</code>-Erweiterung
+          in <code class="inline-code">tailwind.config.js</code>:
+        </p>
+        <pre class="file" style="margin-top:10px;"><code>theme: {
+  extend: {
+    colors: {
+      'swiss-red':  { 100: '#fae1e2', 500: '#e53940', 600: '#d8232a', 700: '#bf1f25' },
+      'swiss-dark': { 500: '#46596b', 600: '#2f4356', 700: '#263645' },
+    },
+    borderRadius: { swiss: '0.1875rem' },
+  },
+}</code></pre>
+        <p>
+          Details, eine zweite Umsetzung als eigene Komponentenklasse und
+          weitere Bausteine (Kopfbereich, Formulare, Schrift) stehen auf der
+          Seite <a href="tailwind-swiss-look.html">Swiss-Look nur mit
+          Tailwind</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="file-label" style="margin-top:18px;">Buttons statt eigener CSS-Klasse <code>.buttons</code>:</div>
+    <pre class="file"><code>&lt;button id="button"
+  class="inline-flex items-center rounded-swiss bg-swiss-red-600 px-4 py-2
+         text-sm font-bold text-white shadow-sm transition-colors
+         hover:bg-swiss-red-700 active:bg-swiss-red-800
+         focus:outline-none focus:ring-2 focus:ring-swiss-red-500 focus:ring-offset-2"&gt;
+  Click me
+&lt;/button&gt;</code></pre>
+    <p style="margin-top:14px;">
+      Statt einer <code class="inline-code">.buttons</code>-Regel in einer
+      separaten CSS-Datei stehen Grundfarbe, Hover-, Active- und Fokus-Zustand
+      direkt als Utility-Klassen im Markup — <code class="inline-code">hover:</code>
+      greift beim Darüberfahren, <code class="inline-code">active:</code>
+      während des Klicks (ein zusätzlicher, dunklerer Farbton,
+      <code class="inline-code">swiss-red-800</code>). Ohne eigenes
+      <code class="inline-code">active:</code> bleibt ein Button beim Klick
+      optisch "stumm" — nur der Fokus-Ring erscheint, aber keine sichtbare
+      Druck-Rückmeldung. Der zweite Button bekommt denselben Look als
+      Outline-Variante (<code class="inline-code">border border-swiss-red-600
+      text-swiss-red-600</code> statt <code class="inline-code">bg-swiss-red-600</code>),
+      ohne eine zweite CSS-Klasse zu definieren.
+    </p>
+
+    <div class="file-label">Toggle-Switch mit <code>peer</code>/<code>peer-checked</code> statt eigenem CSS:</div>
+    <pre class="file"><code>&lt;input type="checkbox" id="checkboxInput" class="peer hidden" /&gt;
+&lt;label for="checkboxInput"
+  class="relative flex h-7 w-12 cursor-pointer items-center rounded-full
+         bg-gray-400 transition-colors duration-200 peer-checked:bg-swiss-red-600
+         after:absolute after:left-1 after:h-4 after:w-4 after:rounded-full
+         after:bg-white after:shadow after:transition-transform after:duration-200
+         peer-checked:after:translate-x-5"&gt;
+&lt;/label&gt;</code></pre>
+    <p style="margin-top:14px;">
+      Die Original-Vorlage (<code class="inline-code">p5_instanceMode/</code>)
+      löst denselben Toggle-Switch mit einer eigenen CSS-Regel
+      <code class="inline-code">#checkboxInput:checked + .toggleSwitch::after</code>
+      — der bewegliche Punkt ist dort ein <code class="inline-code">::after</code>-Pseudo-Element
+      des Labels, kein eigenes verschachteltes Element. Das ist kein Zufall:
+      <code class="inline-code">peer-checked:*</code> erzeugt im Hintergrund
+      einen Geschwister-Selektor (<code class="inline-code">~</code>) und
+      wirkt deshalb nur auf echte Geschwister von
+      <code class="inline-code">.peer</code> — ein verschachtelter
+      <code class="inline-code">&lt;span&gt;</code> <em>innerhalb</em> des
+      Labels wäre ein Nachfahre, kein Geschwister, und
+      <code class="inline-code">peer-checked:translate-x-5</code> darauf
+      würde nie greifen. Tailwinds <code class="inline-code">after:</code>-Variante
+      bildet deshalb genau das CSS-Original nach: sie stylt das
+      <code class="inline-code">::after</code>-Pseudo-Element des Labels
+      selbst, das <em>ist</em> ein Geschwister von
+      <code class="inline-code">.peer</code> — ganz ohne eigene CSS-Regel.
+    </p>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Kopiert die Dateien aus <code class="inline-code">p5_instanceMode/</code> <a href="https://github.com/hslu-dda/hs26-share5/blob/main/p5_instanceMode.zip" target="_blank" rel="noopener noreferrer">Projekt laden</a> (p5.min.js, Ball.js, sketch.js, sketch2.js, sketch3.js) unverändert in einen eigenen <code class="inline-code">js/</code>-Ordner.</li>
+        <li>Ergänzt <code class="inline-code">theme.extend</code> in eurer <code class="inline-code">tailwind.config.js</code> wie oben gezeigt.</li>
+        <li>Bindet die Sketches wie gewohnt per <code class="inline-code">&lt;script&gt;</code> ein und platziert die drei <code class="inline-code">canvas</code>-Container im responsiven Grid oben.</li>
+        <li>Ändert <code class="inline-code">lg:grid-cols-3</code> testweise auf <code class="inline-code">lg:grid-cols-2</code> und beobachtet, ab welcher Fensterbreite sich das Layout umbricht.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section class="article-section">
+  <div class="wrap">
+    <h2>7. Kopfbereich im Swiss-Look in Tailwind (Beispiel)</h2>
+    <p>
+      Dunkler Balken, weisse Schrift, Logo-Platzhalter links, Navigation
+      rechts — der grobe Eindruck des <code class="inline-code">top-bar</code>. 
+    </p>
+
+   
+    <pre class="file"><code>&lt;header class="border-b border-gray-200"&gt;
+  &lt;!-- Obere Zeile: Platzhalter für Logo / Absender --&gt;
+  &lt;div class="border-b border-gray-200 bg-swiss-dark-600"&gt;
+    &lt;div class="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-4"&gt;
+      &lt;a href="#" class="text-sm text-white hover:text-swiss-red-600"&gt;
+        Bundesamt für Gesundheit BAG&lt;br /&gt;
+        Infoportal übertragbare Krankheiten
+      &lt;/a&gt;
+      &lt;span class="text-sm text-white"&gt;DE&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</code></pre>
+
+    
+</section>
+
+<section class="article-section">
+  <div class="wrap">
+    <h2>8. Navigation im Swiss-Look in Tailwind (Beispiel)</h2>
+    <p>
+    In den Header kopieren: Look and Feel BAG, :hover und :active Effekte des Hauptmenüs.
+    </p>
+
+   
+    <pre class="file"><code>&lt;!-- Hauptnavigation --&gt;
+&lt;div class="mx-auto max-w-screen-xl px-6"&gt;
+  &lt;nav aria-label="Main"&gt;
+    &lt;ul class="flex"&gt;
+
+      &lt;!-- Normaler Menüpunkt
+           "group" auf dem Link: Kinder können mit group-hover: auf den Hover reagieren.
+           Das &lt;span&gt; ist die rote Linie: standardmässig unsichtbar (scale-x-0),
+           beim Hover über den Link fährt sie von links ein (group-hover:scale-x-100). --&gt;
+      &lt;li&gt;
+        &lt;a href="#"
+           class="group relative block px-4 py-5 text-base font-medium text-gray-700
+                  transition-colors hover:text-swiss-red-600
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-swiss-red-600"&gt;
+          Aktuell
+          &lt;span aria-hidden="true"
+                class="absolute inset-x-4 bottom-0 h-[3px] origin-left scale-x-0 bg-swiss-red-600
+                       transition-transform duration-200 group-hover:scale-x-100"&gt;&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+
+      &lt;li&gt;
+        &lt;a href="#"
+           class="group relative block px-4 py-5 text-base font-medium text-gray-700
+                  transition-colors hover:text-swiss-red-600
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-swiss-red-600"&gt;
+          Krankheiten/Erreger
+          &lt;span aria-hidden="true"
+                class="absolute inset-x-4 bottom-0 h-[3px] origin-left scale-x-0 bg-swiss-red-600
+                       transition-transform duration-200 group-hover:scale-x-100"&gt;&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+
+      &lt;!-- Aktiver Menüpunkt:
+           rote Schrift + Linie dauerhaft sichtbar (kein scale-x-0).
+           aria-current="page" sagt Screenreadern, dass dies die aktuelle Seite ist. --&gt;
+      &lt;li&gt;
+        &lt;a href="#" aria-current="page"
+           class="relative block px-4 py-5 text-base font-medium text-swiss-red-600
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-swiss-red-600"&gt;
+          Themen
+          &lt;span aria-hidden="true"
+                class="absolute inset-x-4 bottom-0 h-[3px] bg-swiss-red-600"&gt;&lt;/span&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+&lt;/div&gt;</code></pre>
+
+    
+</section>
 <section>
   <div class="wrap">
     <div class="takeaway">
       <strong>Mitnahme aus Teil 3</strong>
-      <span>Du verstehst die Kette HTML → Tailwind-Scan → PostCSS → fertiges CSS, kennst den Zweck des Watchers und hast ein minimales Tailwind+Node-Setup selbst aufgesetzt.</span>
+      <span>Du verstehst die Kette HTML → Tailwind-Scan → PostCSS → fertiges CSS, kennst den Zweck des Watchers, hast ein minimales Tailwind+Node-Setup selbst aufgesetzt und weisst, wie sich p5-Sketches im Instance Mode responsiv mit Tailwind gruppieren und stylen lassen.</span>
     </div>
   </div>
 </section>
@@ -411,8 +649,7 @@
 <footer>
   <div class="wrap" style="display:flex; justify-content:space-between;">
     <span>← <a href="teil2-tailwind-ohne-node.html">Teil 2: Tailwind ohne Node</a></span>
-    <span>Teil 3 / 4</span>
-    <span>Weiter mit → <a href="teil4-designsystem.html">Teil 4: Designsystem</a></span>
+    <span>Teil 3 / 3</span>
   </div>
 </footer>
 

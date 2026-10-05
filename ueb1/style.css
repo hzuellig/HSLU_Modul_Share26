@@ -17,7 +17,7 @@ h2 {
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 2fr 1fr;
   /* mobil: 1 Spalte */
   gap: 12px;
 }
@@ -32,19 +32,20 @@ h2 {
 }
 
 /* Ab 700px Breite: 3 Spalten nebeneinander */
-/*  @media (min-width: 700px) {
+@media (max-width: 700px) {
             .grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: 1fr;
             }
-        }*/
+        }
 
 /* ---------p5.js Sketch --------- */        
 canvas {
   display: block;
+  
 }
 
 #p5Sketch {
-  width: 100%;
+  width: 100% !important;
   max-width: 700px;
   margin: 12px auto 0;
 }

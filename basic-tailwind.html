@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tailwind Basics – Konzepte auf einen Blick</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#1b1b1f;
+    --paper:#faf9f6;
+    --muted:#6b6f76;
+    --line:#e3e1db;
+    --accent:#dc0018;
+    --panel:#f1efe9;
+    --code-bg:#15161a;
+    --code-ink:#e8e8ea;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    font-weight:700;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  code,.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 24px;}
+
+  header.hero{border-bottom:1px solid var(--line); padding:48px 0 36px;}
+  .kicker{color:var(--accent); font-weight:600; font-size:0.9rem; margin-bottom:12px;}
+  h1{font-size:clamp(1.8rem, 3.4vw, 2.3rem); max-width:26ch;}
+  .lead{margin-top:14px; font-size:1.08rem; color:var(--muted); max-width:62ch;}
+
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  h2{font-size:1.3rem; margin-bottom:14px;}
+  p{max-width:68ch;}
+
+  .inline-code{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:0.92em;
+  }
+
+  /* Pipeline / architecture diagram */
+  .pipeline{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:stretch;
+    gap:0;
+    margin-top:20px;
+  }
+  .pipe-box{
+    flex:1 1 150px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 14px;
+  }
+  .pipe-box .k{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin-bottom:6px;
+    display:block;
+  }
+  .pipe-box strong{display:block; font-family:'Space Grotesk',sans-serif; font-size:0.98rem; margin-bottom:4px;}
+  .pipe-box p{margin:0; font-size:0.85rem; color:var(--muted); max-width:none;}
+  .pipe-arrow{
+    display:flex; align-items:center; justify-content:center;
+    flex:0 0 32px;
+    color:var(--muted);
+    font-size:1.3rem;
+  }
+  @media (max-width: 700px){
+    .pipeline{flex-direction:column;}
+    .pipe-arrow{transform:rotate(90deg); flex:0 0 24px;}
+  }
+
+  .watcher-box{
+    display:flex;
+    gap:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:4px solid var(--accent);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-top:20px;
+  }
+  .watcher-box .q{font-family:'Space Grotesk',sans-serif; font-weight:700; margin-bottom:6px;}
+  .watcher-box p{margin:0; max-width:none;}
+
+  .steps-setup{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-top:20px;
+  }
+  .setup-item{
+    display:grid;
+    grid-template-columns:36px 1fr;
+    gap:16px;
+    padding:18px 0;
+    border-top:1px solid var(--line);
+  }
+  .setup-item:first-child{border-top:none; padding-top:6px;}
+  .setup-item .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:1.1rem;
+    color:var(--accent);
+  }
+  .setup-item h4{font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:8px;}
+  .setup-item p{margin:0 0 8px; color:var(--muted); font-size:0.95rem;}
+
+  .cmd{
+    background:var(--code-bg);
+    border-radius:4px;
+    padding:12px 14px;
+    font-size:0.85rem;
+    color:var(--code-ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    overflow-x:auto;
+  }
+  .cmd + .cmd{margin-top:6px;}
+  .cmd code{color:var(--code-ink); white-space:pre;}
+  .copy-btn{
+    background:transparent;
+    border:1px solid #555;
+    color:#ddd;
+    border-radius:4px;
+    padding:4px 10px;
+    font-size:0.75rem;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .copy-btn:hover{border-color:#888; color:#fff;}
+  .copy-btn.copied{border-color:var(--accent); color:var(--accent);}
+
+  pre.file{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:14px 16px;
+    border-radius:8px;
+    font-size:0.8rem;
+    overflow-x:auto;
+    margin:8px 0 0;
+  }
+  .file-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--muted);
+    margin-top:16px;
+    margin-bottom:2px;
+  }
+
+  table.tree{border-collapse:collapse; width:100%; margin-top:16px; font-size:0.9rem;}
+  table.tree td{padding:6px 10px; border-top:1px solid var(--line); vertical-align:top;}
+  table.tree td:first-child{font-family:'JetBrains Mono',monospace; white-space:nowrap; color:var(--ink);}
+  table.tree td:last-child{color:var(--muted);}
+
+  .task{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:18px 20px; margin-top:18px;
+  }
+  .task strong{display:block; margin-bottom:6px; font-family:'Space Grotesk',sans-serif;}
+  .task ul{margin:8px 0 0; padding-left:20px;}
+  .task li{margin-bottom:4px;}
+
+  .takeaway{background:var(--ink); color:var(--paper); border-radius:6px; padding:20px 22px;}
+  .takeaway strong{color:var(--paper); font-family:'Space Grotesk',sans-serif; display:block; margin-bottom:4px;}
+  .takeaway span{color:#c9c9cc;}
+
+  footer{padding:32px 0 64px; color:var(--muted); font-size:0.9rem;}
+  footer a{color:var(--accent); text-decoration:none;}
+
+  /* Anchor classes on this page */
+  .anchor-chip{
+    display:inline-block;
+    background:var(--code-bg);
+    color:var(--code-ink);
+    border-radius:4px;
+    padding:2px 8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.85em;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Zwischenstopp · 8 Minuten</div>
+    <h1>Tailwind Basics — die Schreibweise verstehen</h1>
+    <p class="lead">
+      Bevor es mit p5.js weitergeht, lohnt sich ein kurzer Blick auf die
+      Tailwind-Syntax selbst: Was bedeuten Klassen wie
+      <span class="anchor-chip">sm:grid-cols-2</span>,
+      <span class="anchor-chip">hover:bg-blue-700</span> oder
+      <span class="anchor-chip">peer-checked:bg-violet-500</span> eigentlich?
+      Diese Seite gibt einen kompakten Überblick über die wichtigsten
+      Konzepte, keine vollständige Referenz.
+    </p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>1. Utility-First: viele kleine Klassen statt einer grossen</h2>
+    <p>
+      Statt eine eigene CSS-Klasse wie <code class="inline-code">.card</code>
+      zu schreiben und darin Regeln zu sammeln, kombiniert man in Tailwind
+      viele kleine, fertige <strong>Utility-Klassen</strong> direkt im
+      HTML — jede macht genau eine Sache.
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-box">
+        <span class="k">Klassisches CSS</span>
+        <strong>eigene Klasse</strong>
+        <p><code class="inline-code">.card { padding:1rem; border-radius:0.5rem; box-shadow:...; }</code> — Regeln stehen in einer separaten Datei.</p>
+      </div>
+      <div class="pipe-arrow">↔</div>
+      <div class="pipe-box">
+        <span class="k">Tailwind</span>
+        <strong>Utility-Klassen</strong>
+        <p><code class="inline-code">class="p-4 rounded-lg shadow"</code> — jede Klasse setzt genau eine CSS-Eigenschaft, direkt im Markup sichtbar.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;">
+      Der Name folgt meist dem Muster <code class="inline-code">eigenschaft-wert</code>:
+      <code class="inline-code">p-4</code> = <code class="inline-code">padding: 1rem</code>,
+      <code class="inline-code">bg-blue-600</code> = ein bestimmter Blauton als Hintergrund,
+      <code class="inline-code">rounded-lg</code> = grosser Radius für abgerundete Ecken.
+      Die genauen Werte definiert Tailwinds Standard-Theme (in
+      <code class="inline-code">tailwind.config.js</code> anpassbar).
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>2. Responsive Design: die Präfixe <span class="anchor-chip">sm:</span> <span class="anchor-chip">md:</span> <span class="anchor-chip">lg:</span></h2>
+    <p>
+      Tailwind ist <strong>mobile-first</strong>: eine Klasse ohne Präfix gilt
+      immer, ab einer bestimmten Fensterbreite kann eine
+      <em>zusätzliche</em>, überschreibende Klasse mit Breakpoint-Präfix
+      dazukommen. Aus unserem p5-Grid:
+    </p>
+
+    <pre class="file"><code>&lt;div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"&gt;</code></pre>
+
+    <p style="margin-top:14px;">
+      Das liest man von links nach rechts als "zuerst diese Regel, dann ab
+      dieser Breite jene Regel":
+    </p>
+
+    <table class="tree">
+      <tr><td>grid-cols-1</td><td>gilt immer — Grundeinstellung ohne Präfix (mobile), eine Spalte</td></tr>
+      <tr><td>sm:grid-cols-2</td><td>ab 640px Fensterbreite: zwei Spalten</td></tr>
+      <tr><td>lg:grid-cols-3</td><td>ab 1024px Fensterbreite: drei Spalten</td></tr>
+    </table>
+
+    <p style="margin-top:18px;">Die Standard-Breakpoints von Tailwind:</p>
+    <table class="tree">
+      <tr><td>sm</td><td>≥ 640px — z.B. grosses Smartphone quer, kleines Tablet</td></tr>
+      <tr><td>md</td><td>≥ 768px — Tablet</td></tr>
+      <tr><td>lg</td><td>≥ 1024px — kleiner Laptop</td></tr>
+      <tr><td>xl</td><td>≥ 1280px — Desktop</td></tr>
+      <tr><td>2xl</td><td>≥ 1536px — grosser Desktop</td></tr>
+    </table>
+
+    <div class="watcher-box">
+      <div>
+        <p class="q">Wichtig: kein Präfix bedeutet nicht "nur mobil"</p>
+        <p>
+          <code class="inline-code">grid-cols-1</code> ohne Präfix gilt auf
+          <em>allen</em> Bildschirmgrössen — so lange keine spätere,
+          passende Präfix-Klasse (<code class="inline-code">sm:</code>,
+          <code class="inline-code">lg:</code>, …) sie für grössere
+          Breiten überschreibt. Deshalb reicht es, nur die
+          <em>Änderungen</em> mit Präfix zu versehen.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>3. Zustände: die Präfixe <span class="anchor-chip">hover:</span> <span class="anchor-chip">focus:</span> <span class="anchor-chip">active:</span></h2>
+    <p>
+      Genauso wie Breakpoint-Präfixe funktionieren <strong>Zustands-Präfixe</strong>:
+      sie wenden eine Utility-Klasse nur an, wenn sich das Element in genau
+      diesem Zustand befindet — CSS-Pseudoklassen als Klassennamen-Präfix.
+    </p>
+
+    <pre class="file"><code>&lt;button class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+               focus:outline-none focus:ring-2 focus:ring-blue-400"&gt;
+  Click me
+&lt;/button&gt;</code></pre>
+
+    <table class="tree">
+      <tr><td>bg-blue-600</td><td>Grundzustand — normale Hintergrundfarbe</td></tr>
+      <tr><td>hover:bg-blue-700</td><td>beim Darüberfahren mit der Maus etwas dunkler</td></tr>
+      <tr><td>active:bg-blue-800</td><td>während des Klicks noch dunkler</td></tr>
+      <tr><td>focus:ring-2</td><td>bei Tastatur-Fokus (Tab-Taste) ein sichtbarer Ring statt des Browser-Standard-Outlines</td></tr>
+    </table>
+
+    <p style="margin-top:14px;">
+      Diese Präfixe lassen sich mit den Breakpoint-Präfixen kombinieren, z.B.
+      <code class="inline-code">lg:hover:bg-blue-700</code> — wirkt nur ab
+      der <code class="inline-code">lg</code>-Breite beim Hover.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>4. <span class="anchor-chip">peer</span> &amp; <span class="anchor-chip">group</span>: auf andere Elemente reagieren</h2>
+    <p>
+      Manchmal soll sich ein Element verändern, wenn ein <em>anderes</em>
+      Element einen bestimmten Zustand hat — z.B. ein Label, das anders
+      aussieht, sobald die zugehörige Checkbox angehakt ist. In reinem CSS
+      braucht das oft einen Geschwister-Selektor wie
+      <code class="inline-code">input:checked + label</code>. Tailwind bietet
+      dafür zwei Marker-Klassen an, ohne eigenes CSS schreiben zu müssen:
+    </p>
+
+    <div class="pipeline">
+      <div class="pipe-box">
+        <span class="k">peer</span>
+        <strong>Geschwister-Element</strong>
+        <p>Markiert ein Element (meist ein <code class="inline-code">&lt;input&gt;</code>). Ein <em>danach folgendes Geschwister</em> kann mit <code class="inline-code">peer-checked:</code>, <code class="inline-code">peer-focus:</code> usw. auf dessen Zustand reagieren.</p>
+      </div>
+      <div class="pipe-box">
+        <span class="k">group</span>
+        <strong>Eltern-Element</strong>
+        <p>Markiert ein umschliessendes Element. <em>Nachfahren</em> darin können mit <code class="inline-code">group-hover:</code>, <code class="inline-code">group-focus:</code> usw. auf dessen Zustand reagieren.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;">
+      Beispiel — der Toggle-Switch aus der p5-Demo: die Checkbox trägt die
+      Klasse <code class="inline-code">peer</code> (und bleibt unsichtbar),
+      das folgende <code class="inline-code">&lt;label&gt;</code> reagiert
+      mit <code class="inline-code">peer-checked:</code> auf ihren
+      Checked-Status:
+    </p>
+
+    <pre class="file"><code>&lt;input type="checkbox" id="checkboxInput" class="peer hidden" /&gt;
+&lt;label for="checkboxInput"
+  class="relative flex h-7 w-12 cursor-pointer items-center rounded-full
+         bg-gray-400 transition-colors duration-200 peer-checked:bg-violet-500
+         after:absolute after:left-1 after:h-4 after:w-4 after:rounded-full
+         after:bg-white after:shadow after:transition-transform after:duration-200
+         peer-checked:after:translate-x-5"&gt;
+&lt;/label&gt;</code></pre>
+
+    <div class="watcher-box">
+      <div>
+        <p class="q">Warum ein <code class="inline-code">after:</code>-Pseudo-Element statt einem verschachtelten &lt;span&gt;?</p>
+        <p>
+          <code class="inline-code">peer-checked:*</code> erzeugt im CSS einen
+          <em>Geschwister-Selektor</em> (<code class="inline-code">~</code>).
+          Das wirkt nur auf echte Geschwister-Elemente von
+          <code class="inline-code">.peer</code> — nicht auf Kinder, die
+          irgendwo <em>innerhalb</em> eines Geschwisters verschachtelt sind.
+          Ein <code class="inline-code">&lt;span&gt;</code> innerhalb des
+          <code class="inline-code">&lt;label&gt;</code> wäre ein Nachfahre,
+          kein Geschwister von <code class="inline-code">.peer</code> — die
+          Klasse <code class="inline-code">peer-checked:translate-x-5</code>
+          darauf würde nie greifen. Tailwinds
+          <code class="inline-code">after:</code>-Variante löst das: sie
+          stylt das <code class="inline-code">::after</code>-Pseudo-Element
+          des Labels selbst, das <em>ist</em> ein Geschwister von
+          <code class="inline-code">.peer</code> — genau das Muster, das
+          auch die reine CSS-Lösung mit
+          <code class="inline-code">#checkboxInput:checked + .toggleSwitch::after</code>
+          verwendet.
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top:14px;">
+      Wichtig: <code class="inline-code">peer</code> muss auf dem
+      <em>vorherigen</em> Geschwister-Element sitzen — die Klasse
+      <code class="inline-code">peer-checked:*</code> wirkt nur auf Elemente,
+      die im HTML <em>danach</em> kommen <strong>und auf derselben Ebene
+      stehen</strong> (echte Geschwister, keine Nachfahren). Bei
+      <code class="inline-code">group</code> steht die Marker-Klasse dagegen
+      auf einem <em>umschliessenden</em> Element, nicht auf einem
+      Geschwister.
+    </p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5. Häufige Utility-Kategorien im Überblick</h2>
+    <p>Eine kleine Auswahl, um Muster in Klassennamen leichter zu erkennen:</p>
+    <table class="tree">
+      <tr><td>p-4, px-4, py-2, m-2, gap-6</td><td>Abstände: padding, margin, Zwischenraum in Flex/Grid</td></tr>
+      <tr><td>bg-*, text-*, border-*</td><td>Farben für Hintergrund, Text, Rahmen (z.B. bg-blue-600, text-white)</td></tr>
+      <tr><td>flex, grid, grid-cols-3, items-center, justify-between</td><td>Layout: Flexbox &amp; Grid</td></tr>
+      <tr><td>rounded-md, shadow-sm</td><td>abgerundete Ecken, Schatten</td></tr>
+      <tr><td>transition-colors, duration-200</td><td>weiche Übergänge zwischen Zuständen</td></tr>
+      <tr><td>hidden, block, relative, absolute</td><td>Sichtbarkeit &amp; Positionierung</td></tr>
+    </table>
+
+    <div class="task">
+      <strong>Zum Ausprobieren</strong>
+      <ul>
+        <li>Öffnet <code class="inline-code">index.html</code> aus der p5-Demo und sucht dort je eine Klasse aus jeder Kategorie oben.</li>
+        <li>Ändert testweise <code class="inline-code">bg-blue-600</code> auf <code class="inline-code">bg-blue-600</code> → <code class="inline-code">bg-rose-600</code> und beobachtet, was sich ändert.</li>
+        <li>Fügt einem beliebigen Button <code class="inline-code">md:text-lg</code> hinzu — was passiert beim Verändern der Fensterbreite?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="takeaway">
+      <strong>Mitnahme</strong>
+      <span>Utility-Klassen folgen dem Muster eigenschaft-wert, Breakpoint-Präfixe (sm:, md:, lg:) sind mobile-first additiv, Zustands-Präfixe (hover:, focus:) wenden Klassen nur in diesem Zustand an, und peer/group lassen Elemente auf den Zustand von Geschwistern oder Eltern reagieren — ganz ohne eigenes CSS.</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <span>← <a href="teil3-tailwind-mit-node.html">Zurück zu Teil 3: Tailwind mit Node</a></span>
+    <span><a href="tailwind-swiss-look.html">Swiss-Look nur mit Tailwind</a></span>
+    <span>Weiter mit → <a href="teil4-designsystem.html">Teil 4: Designsystem</a></span>
+   </div>
+</footer>
+
+</body>
+</html>
