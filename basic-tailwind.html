@@ -207,14 +207,12 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="kicker">Zwischenstopp · 8 Minuten</div>
     <h1>Tailwind Basics — die Schreibweise verstehen</h1>
     <p class="lead">
       Bevor es mit p5.js weitergeht, lohnt sich ein kurzer Blick auf die
       Tailwind-Syntax selbst: Was bedeuten Klassen wie
       <span class="anchor-chip">sm:grid-cols-2</span>,
       <span class="anchor-chip">hover:bg-blue-700</span> oder
-      <span class="anchor-chip">peer-checked:bg-violet-500</span> eigentlich?
       Diese Seite gibt einen kompakten Überblick über die wichtigsten
       Konzepte, keine vollständige Referenz.
     </p>
@@ -333,89 +331,11 @@
   </div>
 </section>
 
-<section>
-  <div class="wrap">
-    <h2>4. <span class="anchor-chip">peer</span> &amp; <span class="anchor-chip">group</span>: auf andere Elemente reagieren</h2>
-    <p>
-      Manchmal soll sich ein Element verändern, wenn ein <em>anderes</em>
-      Element einen bestimmten Zustand hat — z.B. ein Label, das anders
-      aussieht, sobald die zugehörige Checkbox angehakt ist. In reinem CSS
-      braucht das oft einen Geschwister-Selektor wie
-      <code class="inline-code">input:checked + label</code>. Tailwind bietet
-      dafür zwei Marker-Klassen an, ohne eigenes CSS schreiben zu müssen:
-    </p>
 
-    <div class="pipeline">
-      <div class="pipe-box">
-        <span class="k">peer</span>
-        <strong>Geschwister-Element</strong>
-        <p>Markiert ein Element (meist ein <code class="inline-code">&lt;input&gt;</code>). Ein <em>danach folgendes Geschwister</em> kann mit <code class="inline-code">peer-checked:</code>, <code class="inline-code">peer-focus:</code> usw. auf dessen Zustand reagieren.</p>
-      </div>
-      <div class="pipe-box">
-        <span class="k">group</span>
-        <strong>Eltern-Element</strong>
-        <p>Markiert ein umschliessendes Element. <em>Nachfahren</em> darin können mit <code class="inline-code">group-hover:</code>, <code class="inline-code">group-focus:</code> usw. auf dessen Zustand reagieren.</p>
-      </div>
-    </div>
-
-    <p style="margin-top:18px;">
-      Beispiel — der Toggle-Switch aus der p5-Demo: die Checkbox trägt die
-      Klasse <code class="inline-code">peer</code> (und bleibt unsichtbar),
-      das folgende <code class="inline-code">&lt;label&gt;</code> reagiert
-      mit <code class="inline-code">peer-checked:</code> auf ihren
-      Checked-Status:
-    </p>
-
-    <pre class="file"><code>&lt;input type="checkbox" id="checkboxInput" class="peer hidden" /&gt;
-&lt;label for="checkboxInput"
-  class="relative flex h-7 w-12 cursor-pointer items-center rounded-full
-         bg-gray-400 transition-colors duration-200 peer-checked:bg-violet-500
-         after:absolute after:left-1 after:h-4 after:w-4 after:rounded-full
-         after:bg-white after:shadow after:transition-transform after:duration-200
-         peer-checked:after:translate-x-5"&gt;
-&lt;/label&gt;</code></pre>
-
-    <div class="watcher-box">
-      <div>
-        <p class="q">Warum ein <code class="inline-code">after:</code>-Pseudo-Element statt einem verschachtelten &lt;span&gt;?</p>
-        <p>
-          <code class="inline-code">peer-checked:*</code> erzeugt im CSS einen
-          <em>Geschwister-Selektor</em> (<code class="inline-code">~</code>).
-          Das wirkt nur auf echte Geschwister-Elemente von
-          <code class="inline-code">.peer</code> — nicht auf Kinder, die
-          irgendwo <em>innerhalb</em> eines Geschwisters verschachtelt sind.
-          Ein <code class="inline-code">&lt;span&gt;</code> innerhalb des
-          <code class="inline-code">&lt;label&gt;</code> wäre ein Nachfahre,
-          kein Geschwister von <code class="inline-code">.peer</code> — die
-          Klasse <code class="inline-code">peer-checked:translate-x-5</code>
-          darauf würde nie greifen. Tailwinds
-          <code class="inline-code">after:</code>-Variante löst das: sie
-          stylt das <code class="inline-code">::after</code>-Pseudo-Element
-          des Labels selbst, das <em>ist</em> ein Geschwister von
-          <code class="inline-code">.peer</code> — genau das Muster, das
-          auch die reine CSS-Lösung mit
-          <code class="inline-code">#checkboxInput:checked + .toggleSwitch::after</code>
-          verwendet.
-        </p>
-      </div>
-    </div>
-
-    <p style="margin-top:14px;">
-      Wichtig: <code class="inline-code">peer</code> muss auf dem
-      <em>vorherigen</em> Geschwister-Element sitzen — die Klasse
-      <code class="inline-code">peer-checked:*</code> wirkt nur auf Elemente,
-      die im HTML <em>danach</em> kommen <strong>und auf derselben Ebene
-      stehen</strong> (echte Geschwister, keine Nachfahren). Bei
-      <code class="inline-code">group</code> steht die Marker-Klasse dagegen
-      auf einem <em>umschliessenden</em> Element, nicht auf einem
-      Geschwister.
-    </p>
-  </div>
-</section>
 
 <section>
   <div class="wrap">
-    <h2>5. Häufige Utility-Kategorien im Überblick</h2>
+    <h2>4. Häufige Utility-Kategorien im Überblick</h2>
     <p>Eine kleine Auswahl, um Muster in Klassennamen leichter zu erkennen:</p>
     <table class="tree">
       <tr><td>p-4, px-4, py-2, m-2, gap-6</td><td>Abstände: padding, margin, Zwischenraum in Flex/Grid</td></tr>
@@ -449,8 +369,6 @@
 <footer>
   <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
     <span>← <a href="teil3-tailwind-mit-node.html">Zurück zu Teil 3: Tailwind mit Node</a></span>
-    <span><a href="tailwind-swiss-look.html">Swiss-Look nur mit Tailwind</a></span>
-    <span>Weiter mit → <a href="teil4-designsystem.html">Teil 4: Designsystem</a></span>
    </div>
 </footer>
 
